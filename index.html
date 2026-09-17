@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>俄罗斯三城 7 日游 · 莫斯科·摩尔曼斯克·圣彼得堡</title>
 
-    <!-- 高德地图安全密钥 -->
     <script>
         window._AMapSecurityConfig = {
             securityJsCode: '0d7f18c42770cc3c23126507d22d05f5'
@@ -161,6 +160,63 @@
         /* ============ Tab 内容区 ============ */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* ============ 出行人员 ============ */
+        .travelers-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid #e9eef3;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .travelers-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .travelers-list {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .traveler {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .traveler-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            border: 2px solid white;
+        }
+
+        .traveler-avatar.jiajia { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .traveler-avatar.chunchun { background: linear-gradient(135deg, #f093fb, #f5576c); }
+
+        .traveler-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
 
         /* ============ 航班滑动卡片 ============ */
         .flight-hero {
@@ -327,7 +383,6 @@
         .overview-day-summary { font-size: 12.5px; color: #64748b; line-height: 1.5; }
         .overview-day-date { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
-        /* 天气信息 */
         .overview-day-weather {
             display: flex;
             align-items: center;
@@ -338,7 +393,6 @@
         }
 
         .weather-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
-
         .weather-info { display: flex; flex-direction: column; gap: 2px; }
 
         .weather-temps {
@@ -353,7 +407,6 @@
         .weather-temps .high { color: #ef4444; }
         .weather-temps .sep { color: #cbd5e1; font-weight: 400; }
         .weather-temps .low { color: #3b82f6; }
-
         .weather-desc { font-size: 11px; color: #64748b; }
 
         .weather-loading {
@@ -373,14 +426,9 @@
             animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .weather-unavailable {
-            font-size: 11px;
-            color: #cbd5e1;
-        }
+        .weather-unavailable { font-size: 11px; color: #cbd5e1; }
 
         /* ============ 每日行程完整卡片 ============ */
         .timeline { display: flex; flex-direction: column; gap: 16px; }
@@ -547,15 +595,10 @@
             background: #fafbfd;
         }
 
-        .accordion.open .accordion-body {
-            max-height: 2000px;
-        }
+        .accordion.open .accordion-body { max-height: 2500px; }
 
-        .accordion-inner {
-            padding: 8px 18px 18px;
-        }
+        .accordion-inner { padding: 8px 18px 18px; }
 
-        /* 清单项 */
         .checklist-item {
             display: flex;
             align-items: flex-start;
@@ -623,7 +666,6 @@
 
         .checklist-cat:first-child { padding-top: 4px; }
 
-        /* 预约链接列表 */
         .prep-link {
             display: flex;
             align-items: flex-start;
@@ -638,14 +680,358 @@
 
         .prep-link:last-child { border-bottom: none; }
 
-        .prep-link .emoji {
-            font-size: 15px;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
+        .prep-link .emoji { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
         .prep-link .text { flex: 1; }
         .prep-link .text small { display: block; color: #94a3b8; font-size: 11.5px; margin-top: 2px; }
+
+        /* ============ 记账页 ============ */
+        .ledger-summary {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .ledger-summary-card {
+            flex: 1;
+            background: linear-gradient(145deg, #0b1e33, #1a2f4a);
+            color: white;
+            border-radius: 20px;
+            padding: 16px 14px;
+            box-shadow: 0 10px 20px -8px rgba(0, 20, 40, 0.35);
+        }
+
+        .ledger-summary-card .label {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .ledger-summary-card .value {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #f8fafc;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ledger-summary-card .value .currency {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-right: 2px;
+        }
+
+        .ledger-form-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e9eef3;
+            padding: 16px 18px 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .ledger-form-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ledger-form-row { margin-bottom: 12px; }
+
+        .ledger-form-row label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .ledger-form-row input[type="datetime-local"],
+        .ledger-form-row input[type="number"],
+        .ledger-form-row select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #0f172a;
+            outline: none;
+            font-family: inherit;
+            background: #fafbfd;
+            transition: border-color 0.15s ease, background 0.15s ease;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ledger-form-row input[type="datetime-local"]:focus,
+        .ledger-form-row input[type="number"]:focus,
+        .ledger-form-row select:focus {
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        /* 金额 + 货币行 */
+        .amount-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .currency-select {
+            flex: 0 0 110px;
+            font-weight: 700 !important;
+            cursor: pointer;
+        }
+
+        .amount-row input[type="number"] {
+            flex: 1;
+        }
+
+        .currency-convert {
+            font-size: 11.5px;
+            color: #64748b;
+            margin-top: 6px;
+            min-height: 14px;
+            padding-left: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .person-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .person-btn {
+            flex: 1;
+            padding: 11px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fafbfd;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s ease;
+        }
+
+        .person-btn.active[data-person="夹夹"] {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .person-btn.active[data-person="纯纯"] {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            box-shadow: 0 4px 10px rgba(245, 87, 108, 0.3);
+        }
+
+        .split-display {
+            padding: 11px 14px;
+            background: #f0f7ff;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #1e40af;
+            font-weight: 600;
+            border: 1px dashed #bfdbfe;
+        }
+
+        .split-display .amount {
+            color: #2563eb;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .ledger-add-btn {
+            width: 100%;
+            margin-top: 6px;
+            padding: 14px 0;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+            transition: transform 0.15s ease;
+        }
+
+        .ledger-add-btn:active { transform: scale(0.98); }
+
+        .ledger-error {
+            font-size: 12px;
+            color: #ef4444;
+            margin-top: 8px;
+            height: 14px;
+            text-align: center;
+        }
+
+        /* 每日总结 */
+        .ledger-day-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e9eef3;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .ledger-day-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .ledger-day-date {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .ledger-day-total {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2563eb;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ledger-day-per {
+            font-size: 11.5px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .ledger-day-items {
+            border-top: 1px dashed #eef2f6;
+            padding-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ledger-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+        }
+
+        .ledger-item-time {
+            color: #94a3b8;
+            font-variant-numeric: tabular-nums;
+            min-width: 42px;
+        }
+
+        .ledger-item-person {
+            font-weight: 700;
+            min-width: 34px;
+        }
+
+        .ledger-item-amount {
+            margin-left: auto;
+            font-weight: 600;
+            color: #334155;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .ledger-item-amount .cny-eq {
+            display: block;
+            color: #94a3b8;
+            font-size: 10.5px;
+            font-weight: 500;
+        }
+
+        /* 全部记录 */
+        .ledger-record {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e9eef3;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
+        }
+
+        .ledger-record-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .ledger-record-person {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .ledger-record-time {
+            font-size: 11.5px;
+            color: #94a3b8;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ledger-record-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ledger-record-amount {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ledger-record-share {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .ledger-record-delete {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: #fee2e2;
+            color: #ef4444;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-family: inherit;
+            line-height: 1;
+            padding-bottom: 2px;
+        }
+
+        .ledger-record-delete:active { background: #fecaca; }
+
+        .ledger-empty {
+            text-align: center;
+            padding: 28px 0;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
 
         /* ============ 底部导航栏 ============ */
         .bottom-nav {
@@ -654,7 +1040,7 @@
             left: 0;
             right: 0;
             z-index: 2000;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-top: 1px solid rgba(0, 0, 0, 0.06);
@@ -680,15 +1066,15 @@
         }
 
         .nav-btn .nav-icon {
-            font-size: 20px;
+            font-size: 19px;
             line-height: 1;
             transition: transform 0.2s ease;
         }
 
         .nav-btn .nav-label {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         .nav-btn.active { color: #2563eb; }
@@ -700,13 +1086,12 @@
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 28px;
+            width: 24px;
             height: 3px;
             background: #2563eb;
             border-radius: 0 0 4px 4px;
         }
 
-        /* 底部备注 */
         .footer-note {
             margin-top: 24px;
             background: #ffffff;
@@ -726,12 +1111,14 @@
             .flight-route { font-size: 14px; }
             .countdown-big .days { font-size: 28px; }
             .time-stamp { min-width: 52px; font-size: 12px; }
+            .ledger-summary-card .value { font-size: 20px; }
+            .nav-btn .nav-label { font-size: 10px; }
+            .currency-select { flex: 0 0 96px; font-size: 13px !important; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 密码保护层 -->
     <div class="password-gate" id="passwordGate">
         <div class="password-box">
             <div class="password-icon">🔒</div>
@@ -743,7 +1130,6 @@
         </div>
     </div>
 
-    <!-- 顶部固定栏 -->
     <header class="sticky-header" id="top">
         <div>
             <div class="header-title">俄罗斯三城 7 日游</div>
@@ -759,6 +1145,20 @@
 
         <!-- ==================== Tab 1: 概览 ==================== -->
         <div class="tab-content active" id="tab-overview">
+
+            <div class="travelers-card">
+                <div class="travelers-label">出行人员</div>
+                <div class="travelers-list">
+                    <div class="traveler">
+                        <div class="traveler-avatar jiajia">夹</div>
+                        <div class="traveler-name">夹夹</div>
+                    </div>
+                    <div class="traveler">
+                        <div class="traveler-avatar chunchun">纯</div>
+                        <div class="traveler-name">纯纯</div>
+                    </div>
+                </div>
+            </div>
 
             <section id="flight" class="flight-hero">
                 <div class="flight-tabs">
@@ -1275,9 +1675,75 @@
             </div>
         </div>
 
+        <!-- ==================== Tab 4: 记账 ==================== -->
+        <div class="tab-content" id="tab-ledger">
+            <div class="section-title" style="margin-bottom: 14px;">💰 旅行记账</div>
+
+            <div class="ledger-summary">
+                <div class="ledger-summary-card">
+                    <div class="label">行程总费用</div>
+                    <div class="value"><span class="currency">¥</span><span id="ledgerTotal">0.00</span></div>
+                </div>
+                <div class="ledger-summary-card">
+                    <div class="label">人均费用</div>
+                    <div class="value"><span class="currency">¥</span><span id="ledgerPerPerson">0.00</span></div>
+                </div>
+            </div>
+
+            <div class="ledger-form-card">
+                <div class="ledger-form-title">➕ 添加记录</div>
+
+                <div class="ledger-form-row">
+                    <label>时间</label>
+                    <input type="datetime-local" id="ledgerDate">
+                </div>
+
+                <div class="ledger-form-row">
+                    <label>记账人员</label>
+                    <div class="person-toggle" id="personToggle">
+                        <button class="person-btn active" data-person="夹夹">夹夹</button>
+                        <button class="person-btn" data-person="纯纯">纯纯</button>
+                    </div>
+                </div>
+
+                <div class="ledger-form-row">
+                    <label>总金额</label>
+                    <div class="amount-row">
+                        <select id="ledgerCurrency" class="currency-select">
+                            <option value="CNY">¥ CNY</option>
+                            <option value="USD">$ USD</option>
+                            <option value="RUB">₽ RUB</option>
+                            <option value="EUR">€ EUR</option>
+                        </select>
+                        <input type="number" id="ledgerAmount" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+                    </div>
+                    <div class="currency-convert" id="currencyConvert"></div>
+                </div>
+
+                <div class="ledger-form-row">
+                    <label>人均分摊</label>
+                    <div class="split-display" id="splitDisplay">
+                        人均 <span class="amount">¥0.00</span>（自动按 2 人均摊）
+                    </div>
+                </div>
+
+                <button class="ledger-add-btn" id="ledgerAddBtn">添加记录</button>
+                <div class="ledger-error" id="ledgerError"></div>
+            </div>
+
+            <div class="section-title">📊 每日总结</div>
+            <div id="ledgerDaily">
+                <div class="ledger-empty">暂无记录</div>
+            </div>
+
+            <div class="section-title" style="margin-top: 20px;">📋 全部记录</div>
+            <div id="ledgerList">
+                <div class="ledger-empty">暂无记录</div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- ============ 底部导航栏 ============ -->
     <nav class="bottom-nav" id="bottomNav">
         <button class="nav-btn active" data-tab="overview">
             <span class="nav-icon">🗺️</span>
@@ -1290,6 +1756,10 @@
         <button class="nav-btn" data-tab="prepare">
             <span class="nav-icon">🎒</span>
             <span class="nav-label">准备</span>
+        </button>
+        <button class="nav-btn" data-tab="ledger">
+            <span class="nav-icon">💰</span>
+            <span class="nav-label">记账</span>
         </button>
     </nav>
 
@@ -1412,7 +1882,8 @@
             const tabs = {
                 overview: document.getElementById('tab-overview'),
                 itinerary: document.getElementById('tab-itinerary'),
-                prepare: document.getElementById('tab-prepare')
+                prepare: document.getElementById('tab-prepare'),
+                ledger: document.getElementById('tab-ledger')
             };
 
             let dayMapsInited = false;
@@ -1471,6 +1942,356 @@
             });
         })();
 
+        // ============ 记账功能（多货币版） ============
+        (function() {
+            var STORAGE_KEY = 'russia_trip_ledger';
+            var RATE_CACHE_KEY = 'russia_trip_rates';
+            var records = [];
+            var selectedPerson = '夹夹';
+            var currentRate = 1;   // 当前选中货币兑 CNY 的汇率
+
+            // 兜底汇率（API 失败时使用）
+            var FALLBACK_RATES = { CNY: 1, USD: 7.20, RUB: 0.075, EUR: 7.80 };
+            var CURRENCY_SYMBOLS = { CNY: '¥', USD: '$', RUB: '₽', EUR: '€' };
+
+            // 加载记录
+            try {
+                var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (Array.isArray(saved)) records = saved;
+            } catch (e) { records = []; }
+
+            // 兼容旧数据（无 currency 字段）
+            records.forEach(function(r) {
+                if (!r.currency) {
+                    r.currency = 'CNY';
+                    r.originalAmount = r.amount;
+                    r.rate = 1;
+                    r.amountCNY = r.amount;
+                }
+                if (typeof r.amountCNY !== 'number') {
+                    r.amountCNY = Number(r.originalAmount) * (Number(r.rate) || 1);
+                }
+            });
+
+            function save() {
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch (e) {}
+            }
+
+            // ===== 汇率获取 =====
+            var rateCache = {};
+            try {
+                rateCache = JSON.parse(localStorage.getItem(RATE_CACHE_KEY) || '{}');
+            } catch (e) { rateCache = {}; }
+
+            // 缓存的汇率有效期（毫秒）：6 小时
+            var RATE_TTL = 6 * 3600 * 1000;
+
+            function isCacheValid(entry) {
+                return entry && entry.rate && entry.timestamp && (Date.now() - entry.timestamp < RATE_TTL);
+            }
+
+            function saveRateCache() {
+                try { localStorage.setItem(RATE_CACHE_KEY, JSON.stringify(rateCache)); } catch (e) {}
+            }
+
+            // 从 open.er-api.com 获取汇率（免费，无密钥）
+            function fetchRatesFromAPI() {
+                return fetch('https://open.er-api.com/v6/latest/CNY')
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        if (!data || !data.rates) throw new Error('Invalid data');
+                        var now = Date.now();
+                        ['USD', 'RUB', 'EUR'].forEach(function(c) {
+                            if (data.rates[c]) {
+                                rateCache[c] = {
+                                    rate: 1 / data.rates[c],
+                                    timestamp: now
+                                };
+                            }
+                        });
+                        rateCache.CNY = { rate: 1, timestamp: now };
+                        saveRateCache();
+                    });
+            }
+
+            // 获取某货币兑 CNY 的汇率
+            function getRate(currency) {
+                if (currency === 'CNY') return Promise.resolve(1);
+                var cached = rateCache[currency];
+                if (isCacheValid(cached)) return Promise.resolve(cached.rate);
+                // 缓存过期，重新获取
+                return fetchRatesFromAPI()
+                    .then(function() {
+                        var fresh = rateCache[currency];
+                        if (isCacheValid(fresh)) return fresh.rate;
+                        return FALLBACK_RATES[currency] || 1;
+                    })
+                    .catch(function(err) {
+                        console.warn('汇率获取失败，使用兜底汇率', err);
+                        return FALLBACK_RATES[currency] || 1;
+                    });
+            }
+
+            // ===== 表单元素 =====
+            var amountInput = document.getElementById('ledgerAmount');
+            var currencySelect = document.getElementById('ledgerCurrency');
+            var convertDisplay = document.getElementById('currencyConvert');
+            var splitDisplay = document.getElementById('splitDisplay');
+
+            // 更新换算显示
+            function refreshConversion() {
+                var currency = currencySelect.value;
+                var amount = parseFloat(amountInput.value) || 0;
+
+                if (currency === 'CNY') {
+                    currentRate = 1;
+                    convertDisplay.textContent = '';
+                    updateSplit();
+                    return;
+                }
+
+                // 异步获取汇率
+                convertDisplay.textContent = '正在获取汇率…';
+                getRate(currency).then(function(rate) {
+                    currentRate = rate;
+                    if (amount > 0) {
+                        convertDisplay.textContent = '≈ ¥' + (amount * rate).toFixed(2) +
+                            '（1 ' + currency + ' ≈ ¥' + rate.toFixed(4) + '）';
+                    } else {
+                        convertDisplay.textContent = '1 ' + currency + ' ≈ ¥' + rate.toFixed(4);
+                    }
+                    updateSplit();
+                });
+            }
+
+            // 更新人均显示
+            function updateSplit() {
+                var amount = parseFloat(amountInput.value) || 0;
+                var cnyTotal = amount * currentRate;
+                splitDisplay.innerHTML = '人均 <span class="amount">¥' + (cnyTotal / 2).toFixed(2) + '</span>（自动按 2 人均摊）';
+            }
+
+            // ===== 事件绑定 =====
+            amountInput.addEventListener('input', function() {
+                // 金额变化时不重新请求汇率，直接用 currentRate 计算
+                var currency = currencySelect.value;
+                var amount = parseFloat(amountInput.value) || 0;
+                if (currency === 'CNY') {
+                    currentRate = 1;
+                    convertDisplay.textContent = '';
+                } else if (currentRate && currentRate !== 1) {
+                    convertDisplay.textContent = '≈ ¥' + (amount * currentRate).toFixed(2) +
+                        '（1 ' + currency + ' ≈ ¥' + currentRate.toFixed(4) + '）';
+                }
+                updateSplit();
+            });
+
+            currencySelect.addEventListener('change', function() {
+                currentRate = 1;
+                refreshConversion();
+            });
+
+            // 人员切换
+            document.querySelectorAll('.person-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    selectedPerson = btn.dataset.person;
+                    document.querySelectorAll('.person-btn').forEach(function(b) {
+                        b.classList.toggle('active', b === btn);
+                    });
+                });
+            });
+
+            // 添加记录
+            document.getElementById('ledgerAddBtn').addEventListener('click', function() {
+                var datetime = document.getElementById('ledgerDate').value;
+                var amount = parseFloat(amountInput.value);
+                var currency = currencySelect.value;
+                var errorEl = document.getElementById('ledgerError');
+
+                if (!datetime) { errorEl.textContent = '请选择时间'; return; }
+                if (!amount || amount <= 0) { errorEl.textContent = '请输入有效的金额'; return; }
+                if (currency !== 'CNY' && (!currentRate || currentRate === 1)) {
+                    // 可能还在获取汇率，强制获取一次
+                    errorEl.textContent = '正在获取汇率，请稍候…';
+                    getRate(currency).then(function(rate) {
+                        currentRate = rate;
+                        errorEl.textContent = '';
+                        // 自动重试
+                        document.getElementById('ledgerAddBtn').click();
+                    });
+                    return;
+                }
+                errorEl.textContent = '';
+
+                var cnyAmount = amount * currentRate;
+
+                records.push({
+                    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+                    datetime: datetime,
+                    person: selectedPerson,
+                    currency: currency,
+                    originalAmount: amount,
+                    rate: currentRate,
+                    amountCNY: cnyAmount
+                });
+                save();
+                render();
+
+                // 清空金额，保留时间和人员
+                amountInput.value = '';
+                convertDisplay.textContent = '';
+                currentRate = currency === 'CNY' ? 1 : currentRate;
+                updateSplit();
+            });
+
+            // 回车快捷添加
+            amountInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') document.getElementById('ledgerAddBtn').click();
+            });
+
+            // ===== 日期格式化 =====
+            function formatDateLabel(dateStr) {
+                var d = new Date(dateStr + 'T00:00:00');
+                var weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + weekdays[d.getDay()];
+            }
+
+            function formatDateTime(dtStr) {
+                var parts = dtStr.split('T');
+                var dp = parts[0].split('-');
+                return (parseInt(dp[1], 10)) + '/' + (parseInt(dp[2], 10)) + ' ' + (parts[1] || '');
+            }
+
+            function personColor(p) {
+                return p === '夹夹' ? '#667eea' : '#f5576c';
+            }
+
+            // ===== 渲染 =====
+            function render() {
+                // 汇总（按 CNY 金额）
+                var total = records.reduce(function(s, r) { return s + (Number(r.amountCNY) || 0); }, 0);
+                var perPerson = total / 2;
+
+                document.getElementById('ledgerTotal').textContent = total.toFixed(2);
+                document.getElementById('ledgerPerPerson').textContent = perPerson.toFixed(2);
+
+                // 每日分组
+                var byDay = {};
+                records.forEach(function(r) {
+                    var day = r.datetime.split('T')[0];
+                    if (!byDay[day]) byDay[day] = [];
+                    byDay[day].push(r);
+                });
+
+                var days = Object.keys(byDay).sort();
+                var dailyEl = document.getElementById('ledgerDaily');
+                if (!days.length) {
+                    dailyEl.innerHTML = '<div class="ledger-empty">暂无记录</div>';
+                } else {
+                    dailyEl.innerHTML = days.map(function(day) {
+                        var dayRecords = byDay[day].slice().sort(function(a, b) {
+                            return a.datetime.localeCompare(b.datetime);
+                        });
+                        var dayTotal = dayRecords.reduce(function(s, r) { return s + (Number(r.amountCNY) || 0); }, 0);
+                        var dayPer = dayTotal / 2;
+
+                        return '<div class="ledger-day-card">' +
+                            '<div class="ledger-day-header">' +
+                                '<span class="ledger-day-date">' + formatDateLabel(day) + '</span>' +
+                                '<span class="ledger-day-total">总 ¥' + dayTotal.toFixed(2) + '</span>' +
+                            '</div>' +
+                            '<div class="ledger-day-per">人均 ¥' + dayPer.toFixed(2) + '</div>' +
+                            '<div class="ledger-day-items">' +
+                                dayRecords.map(function(r) {
+                                    var time = r.datetime.split('T')[1] || '';
+                                    var sym = CURRENCY_SYMBOLS[r.currency] || '¥';
+                                    var amtHtml;
+                                    if (r.currency === 'CNY') {
+                                        amtHtml = '¥' + Number(r.originalAmount).toFixed(2);
+                                    } else {
+                                        amtHtml = sym + Number(r.originalAmount).toFixed(2) +
+                                            '<span class="cny-eq">≈¥' + Number(r.amountCNY).toFixed(2) + '</span>';
+                                    }
+                                    return '<div class="ledger-item">' +
+                                        '<span class="ledger-item-time">' + time + '</span>' +
+                                        '<span class="ledger-item-person" style="color:' + personColor(r.person) + '">' + r.person + '</span>' +
+                                        '<span class="ledger-item-amount">' + amtHtml + '</span>' +
+                                    '</div>';
+                                }).join('') +
+                            '</div>' +
+                        '</div>';
+                    }).join('');
+                }
+
+                // 全部记录（按时间倒序）
+                var listEl = document.getElementById('ledgerList');
+                if (!records.length) {
+                    listEl.innerHTML = '<div class="ledger-empty">暂无记录</div>';
+                } else {
+                    var sorted = records.slice().sort(function(a, b) {
+                        return b.datetime.localeCompare(a.datetime);
+                    });
+                    listEl.innerHTML = sorted.map(function(r) {
+                        var sym = CURRENCY_SYMBOLS[r.currency] || '¥';
+                        var mainAmt, subAmt;
+                        if (r.currency === 'CNY') {
+                            mainAmt = '¥' + Number(r.originalAmount).toFixed(2);
+                            subAmt = '人均 ¥' + (Number(r.amountCNY) / 2).toFixed(2);
+                        } else {
+                            mainAmt = sym + Number(r.originalAmount).toFixed(2);
+                            subAmt = '≈¥' + Number(r.amountCNY).toFixed(2) + ' · 人均 ¥' + (Number(r.amountCNY) / 2).toFixed(2);
+                        }
+
+                        return '<div class="ledger-record">' +
+                            '<div class="ledger-record-main">' +
+                                '<div class="ledger-record-person" style="color:' + personColor(r.person) + '">' + r.person + '</div>' +
+                                '<div class="ledger-record-time">' + formatDateTime(r.datetime) + '</div>' +
+                            '</div>' +
+                            '<div class="ledger-record-right">' +
+                                '<div class="ledger-record-amount">' + mainAmt + '</div>' +
+                                '<div class="ledger-record-share">' + subAmt + '</div>' +
+                            '</div>' +
+                            '<button class="ledger-record-delete" data-id="' + r.id + '" aria-label="删除">×</button>' +
+                        '</div>';
+                    }).join('');
+
+                    // 删除绑定
+                    listEl.querySelectorAll('.ledger-record-delete').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var id = btn.dataset.id;
+                            if (confirm('确定删除这条记录吗？删除后总费用与每日总结会自动更新。')) {
+                                records = records.filter(function(r) { return r.id !== id; });
+                                save();
+                                render();
+                            }
+                        });
+                    });
+                }
+            }
+
+            // 默认时间：当下
+            function setDefaultDateTime() {
+                var input = document.getElementById('ledgerDate');
+                if (!input) return;
+                var now = new Date();
+                var pad = function(n) { return String(n).padStart(2, '0'); };
+                var val = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+                          'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+                input.value = val;
+            }
+
+            // 初始化
+            setDefaultDateTime();
+            render();
+            // 启动时如果缓存无效，预热汇率
+            if (!isCacheValid(rateCache.USD) || !isCacheValid(rateCache.RUB) || !isCacheValid(rateCache.EUR)) {
+                fetchRatesFromAPI().catch(function() {});
+            }
+        })();
+
         // ============ 天气预测 ============
         (function() {
             var CITIES = {
@@ -1479,7 +2300,6 @@
                 spb:      { lat: 59.9343, lng: 30.3351 }
             };
 
-            // WMO 天气代码 → 图标 + 描述
             function getWeatherInfo(code) {
                 if (code === 0) return { icon: '☀️', desc: '晴' };
                 if (code === 1) return { icon: '🌤️', desc: '大部晴朗' };
@@ -1499,12 +2319,10 @@
                 return { icon: '🌡️', desc: '未知' };
             }
 
-            // 格式化日期为 YYYY-MM-DD
             function formatDate(year, month, day) {
                 return year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
             }
 
-            // 为每个城市获取天气数据
             function fetchWeatherForCity(cityKey, cityCoords) {
                 var url = 'https://api.open-meteo.com/v1/forecast'
                     + '?latitude=' + cityCoords.lat
@@ -1518,29 +2336,21 @@
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         return res.json();
                     })
-                    .then(function(data) {
-                        return data.daily || null;
-                    });
+                    .then(function(data) { return data.daily || null; });
             }
 
-            // 更新页面上的天气显示
             function updateWeatherDisplay(cityKey, dailyData) {
                 var elements = document.querySelectorAll('.overview-day-weather[data-city="' + cityKey + '"]');
                 if (!elements.length) return;
 
                 var now = new Date();
                 var currentYear = now.getFullYear();
-                // 若已过10月7日，使用下一年
-                if (now > new Date(currentYear, 9, 7, 21, 15, 0)) {
-                    currentYear += 1;
-                }
+                if (now > new Date(currentYear, 9, 7, 21, 15, 0)) currentYear += 1;
 
                 elements.forEach(function(el) {
-                    var dateStr = el.dataset.date; // 如 "10-01"
+                    var dateStr = el.dataset.date;
                     var parts = dateStr.split('-');
-                    var month = parseInt(parts[0], 10);
-                    var day = parseInt(parts[1], 10);
-                    var targetDate = formatDate(currentYear, month, day);
+                    var targetDate = formatDate(currentYear, parseInt(parts[0], 10), parseInt(parts[1], 10));
 
                     if (!dailyData || !dailyData.time) {
                         el.innerHTML = '<span class="weather-unavailable">天气数据暂不可用</span>';
@@ -1555,8 +2365,7 @@
 
                     var maxTemp = Math.round(dailyData.temperature_2m_max[idx]);
                     var minTemp = Math.round(dailyData.temperature_2m_min[idx]);
-                    var code = dailyData.weather_code[idx];
-                    var info = getWeatherInfo(code);
+                    var info = getWeatherInfo(dailyData.weather_code[idx]);
 
                     el.innerHTML =
                         '<span class="weather-icon">' + info.icon + '</span>' +
@@ -1571,40 +2380,25 @@
                 });
             }
 
-            // 显示错误状态
             function showWeatherError() {
                 document.querySelectorAll('.overview-day-weather').forEach(function(el) {
                     el.innerHTML = '<span class="weather-unavailable">天气数据暂不可用</span>';
                 });
             }
 
-            // 主流程：并行请求三个城市
-            var cityKeys = Object.keys(CITIES);
-            var promises = cityKeys.map(function(key) {
+            var promises = Object.keys(CITIES).map(function(key) {
                 return fetchWeatherForCity(key, CITIES[key])
-                    .then(function(dailyData) {
-                        return { key: key, data: dailyData };
-                    })
-                    .catch(function(err) {
-                        console.warn('天气获取失败 [' + key + ']:', err);
-                        return { key: key, data: null };
-                    });
+                    .then(function(d) { return { key: key, data: d }; })
+                    .catch(function() { return { key: key, data: null }; });
             });
 
             Promise.all(promises).then(function(results) {
                 var hasAny = false;
                 results.forEach(function(r) {
-                    if (r.data) {
-                        hasAny = true;
-                        updateWeatherDisplay(r.key, r.data);
-                    }
+                    if (r.data) { hasAny = true; updateWeatherDisplay(r.key, r.data); }
                 });
-                if (!hasAny) {
-                    showWeatherError();
-                }
-            }).catch(function() {
-                showWeatherError();
-            });
+                if (!hasAny) showWeatherError();
+            }).catch(showWeatherError);
         })();
 
         // ============ 高德地图：城市总览 ============
