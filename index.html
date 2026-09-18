@@ -12,6 +12,9 @@
     </script>
     <script src="https://webapi.amap.com/maps?v=2.0&key=2d7c381060a90d4729c005d32ea9150a&callback=initAMap"></script>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -27,7 +30,6 @@
             padding-bottom: 96px;
         }
 
-        /* ============ 密码保护层 ============ */
         .password-gate {
             position: fixed;
             inset: 0;
@@ -39,13 +41,7 @@
             padding: 24px;
             transition: opacity 0.35s ease, visibility 0.35s ease;
         }
-
-        .password-gate.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
+        .password-gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .password-box {
             width: 100%;
             max-width: 360px;
@@ -58,11 +54,9 @@
             -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
         }
-
         .password-icon { font-size: 40px; margin-bottom: 12px; line-height: 1; }
         .password-title { font-size: 18px; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
         .password-sub { font-size: 12px; color: #94a3b8; margin-bottom: 22px; }
-
         .password-input {
             width: 100%;
             background: rgba(255, 255, 255, 0.08);
@@ -75,12 +69,9 @@
             letter-spacing: 6px;
             outline: none;
             font-family: inherit;
-            font-variant-numeric: tabular-nums;
         }
-
         .password-input::placeholder { color: #475569; letter-spacing: 2px; font-size: 14px; }
         .password-input:focus { border-color: #3b82f6; }
-
         .password-btn {
             width: 100%;
             margin-top: 16px;
@@ -94,9 +85,7 @@
             cursor: pointer;
             font-family: inherit;
         }
-
         .password-btn:active { transform: scale(0.98); }
-
         .password-error {
             font-size: 12px;
             color: #fca5a5;
@@ -105,10 +94,9 @@
             opacity: 0;
             transition: opacity 0.2s ease;
         }
-
         .password-error.show { opacity: 1; }
 
-        /* ============ 顶部固定栏 ============ */
+        /* ============ 顶部固定栏（已去掉倒计时） ============ */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -117,108 +105,147 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 10px 16px 8px;
+            padding: 10px 16px 10px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         }
-
         .header-title { font-weight: 700; font-size: 18px; color: #0f172a; }
         .header-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
 
-        .countdown-pill {
-            background: #0f172a;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .countdown-pill .dot {
-            width: 6px;
-            height: 6px;
-            background: #fbbf24;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        /* ============ 主容器 ============ */
         .container {
             max-width: 500px;
             margin: 0 auto;
             padding: 16px 16px 0;
         }
 
-        /* ============ Tab 内容区 ============ */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* ============ 出行人员 ============ */
-        .travelers-card {
-            background: white;
-            border-radius: 20px;
-            padding: 16px;
-            border: 1px solid #e9eef3;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        .clocks-card {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
         }
-
-        .travelers-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #64748b;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .travelers-list {
-            display: flex;
-            gap: 20px;
+        .clock-item {
             flex: 1;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e9eef3;
+            padding: 14px 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            text-align: center;
         }
-
-        .traveler {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .traveler-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
+        .clock-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            gap: 4px;
+        }
+        .clock-label .flag { font-size: 14px; }
+        .clock-time {
+            font-size: 26px;
             font-weight: 800;
-            font-size: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            border: 2px solid white;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        .clock-date {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
         }
 
-        .traveler-avatar.jiajia { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .traveler-avatar.chunchun { background: linear-gradient(135deg, #f093fb, #f5576c); }
-
-        .traveler-name {
-            font-size: 12px;
+        /* 酒店卡片（可折叠） */
+        .hotel-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e9eef3;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            transition: padding 0.25s ease;
+        }
+        .hotel-card.collapsed { padding: 14px 16px; }
+        .hotel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            gap: 8px;
+        }
+        .hotel-header-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .hotel-header-right { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .hotel-date-badge {
+            background: #0f172a;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        .hotel-stay-dates {
+            font-size: 11.5px;
+            color: #94a3b8;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .hotel-header-name {
+            font-size: 13px;
             font-weight: 600;
             color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+        .hotel-arrow {
+            font-size: 11px;
+            color: #94a3b8;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+        .hotel-card.collapsed .hotel-arrow { transform: rotate(-90deg); }
+        .hotel-body { margin-top: 12px; }
+        .hotel-card.collapsed .hotel-body { display: none; }
+        .hotel-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .hotel-room-type {
+            font-size: 12.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .hotel-address {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            padding-top: 8px;
+            border-top: 1px dashed #eef2f6;
+        }
+        .hotel-address .emoji { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
 
-        /* ============ 航班滑动卡片 ============ */
         .flight-hero {
             background: linear-gradient(145deg, #0b1e33, #1a2f4a);
             border-radius: 24px;
@@ -228,7 +255,6 @@
             box-shadow: 0 20px 30px -10px rgba(0, 20, 40, 0.3);
             overflow: hidden;
         }
-
         .flight-tabs {
             display: flex;
             gap: 6px;
@@ -237,7 +263,6 @@
             padding: 4px;
             margin-bottom: 14px;
         }
-
         .flight-tab {
             flex: 1;
             border: none;
@@ -254,13 +279,11 @@
             justify-content: center;
             gap: 4px;
         }
-
         .flight-tab.active {
             background: white;
             color: #0f172a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
-
         .flight-slider {
             display: flex;
             overflow-x: auto;
@@ -269,18 +292,14 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
-
         .flight-slider::-webkit-scrollbar { display: none; }
-
         .flight-slide {
             flex: 0 0 100%;
             scroll-snap-align: start;
             scroll-snap-stop: always;
             padding: 4px 1px 0;
         }
-
         .flight-code { font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; }
-
         .flight-route {
             font-size: 16px;
             font-weight: 700;
@@ -290,30 +309,13 @@
             align-items: center;
             gap: 4px;
         }
-
         .flight-route .arrow { opacity: 0.55; margin: 0 2px; }
         .flight-time { font-size: 13px; color: #cbd5e1; margin-top: 6px; }
-
-        .countdown-big {
-            margin-top: 16px;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.07);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-        }
-
-        .countdown-big .label { font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-        .countdown-big .days { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: #f8fafc; line-height: 1; font-variant-numeric: tabular-nums; }
-        .countdown-big .unit { font-size: 14px; color: #94a3b8; font-weight: 500; }
 
         .slide-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
         .slide-dots .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); }
         .slide-dots .dot.active { width: 18px; border-radius: 999px; background: rgba(255, 255, 255, 0.85); }
 
-        /* ============ 通用分区标题 ============ */
         .section-title {
             font-size: 16px;
             font-weight: 700;
@@ -324,7 +326,177 @@
             color: #0f172a;
         }
 
-        /* ============ 地图卡片 ============ */
+        .travelers-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid #e9eef3;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            margin-bottom: 20px;
+        }
+        .travelers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .travelers-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .add-traveler-btn {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #2563eb;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .add-traveler-btn:active { background: #dbeafe; }
+        .travelers-list {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            padding-top: 6px;
+        }
+        .traveler-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            width: 64px;
+        }
+        .traveler-avatar-wrapper {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+        .traveler-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .traveler-avatar:active { transform: scale(0.95); }
+        .traveler-delete-btn {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            border: 2px solid white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0 2px 0;
+            line-height: 1;
+            font-family: inherit;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 5;
+        }
+        .traveler-delete-btn:active { background: #dc2626; transform: scale(0.92); }
+        .traveler-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            text-align: center;
+            max-width: 64px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .travelers-empty {
+            text-align: center;
+            padding: 14px 0;
+            color: #cbd5e1;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .modal-message {
+            font-size: 14px;
+            color: #475569;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #0f172a;
+            outline: none;
+            font-family: inherit;
+            background: #fafbfd;
+        }
+        .modal-input:focus { border-color: #3b82f6; background: white; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .modal-btn:active { transform: scale(0.98); }
+        .modal-btn.cancel { background: #f1f5f9; color: #64748b; }
+        .modal-btn.confirm { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .modal-btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+
         .map-card {
             background: white;
             border-radius: 24px;
@@ -333,9 +505,7 @@
             margin-bottom: 24px;
             border: 1px solid #e9eef3;
         }
-
         #city-map { height: 320px; width: 100%; z-index: 1; }
-
         .map-legend {
             display: flex;
             gap: 14px;
@@ -346,139 +516,254 @@
             border-top: 1px solid #eef2f6;
             flex-wrap: wrap;
         }
-
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .legend-line { display: inline-block; width: 18px; height: 0; border-top: 2px solid #3b82f6; }
         .legend-line.dashed { border-top-style: dashed; }
         .legend-line.train { border-top-color: #f59e0b; }
 
-        /* ============ 概览页每日简化卡片 ============ */
-        .overview-days { display: flex; flex-direction: column; gap: 10px; }
-
-        .overview-day {
+        /* ============ 交通卡片（含倒计时） ============ */
+        .transport-list { display: flex; flex-direction: column; gap: 14px; }
+        .transport-card {
             background: white;
-            border-radius: 18px;
-            padding: 14px 16px;
+            border-radius: 22px;
             border: 1px solid #e9eef3;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.06);
         }
-
-        .overview-day-num {
+        .transport-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            gap: 8px;
+        }
+        .transport-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .transport-day-badge {
             background: #0f172a;
             color: white;
             font-size: 11px;
             font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 8px;
+            padding: 3px 8px;
+            border-radius: 6px;
             white-space: nowrap;
-            min-width: 44px;
-            text-align: center;
+        }
+        .transport-date-text { font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap; }
+        .transport-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        .transport-header-route {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .transport-type-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+        .transport-arrow {
+            font-size: 11px;
+            color: #94a3b8;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+        .transport-card.collapsed .transport-arrow {
+            transform: rotate(-90deg);
+        }
+        .transport-card-body {
+            border-top: 1px solid #f1f5f9;
+            padding: 16px 18px 18px;
+        }
+        .transport-card.collapsed .transport-card-body {
+            display: none;
         }
 
-        .overview-day-body { flex: 1; }
-        .overview-day-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-        .overview-day-summary { font-size: 12.5px; color: #64748b; line-height: 1.5; }
-        .overview-day-date { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-
-        .overview-day-weather {
+        /* 交通卡片倒计时 */
+        .transport-countdown {
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed #eef2f6;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 12px;
+            margin-bottom: 14px;
+            border: 1px solid #bfdbfe;
         }
-
-        .weather-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
-        .weather-info { display: flex; flex-direction: column; gap: 2px; }
-
-        .weather-temps {
-            font-size: 13px;
+        .transport-countdown .cd-icon { font-size: 16px; line-height: 1; }
+        .transport-countdown .cd-label {
+            font-size: 11.5px;
+            color: #1e40af;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .transport-countdown .cd-days {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1d4ed8;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            margin-left: auto;
+        }
+        .transport-countdown .cd-unit {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-left: 2px;
+        }
+        .transport-countdown.started {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: #86efac;
+        }
+        .transport-countdown.started .cd-label { color: #166534; }
+        .transport-countdown.started .cd-days {
+            color: #15803d;
+            font-size: 14px;
             font-weight: 700;
-            color: #0f172a;
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
         }
 
-        .weather-temps .high { color: #ef4444; }
-        .weather-temps .sep { color: #cbd5e1; font-weight: 400; }
-        .weather-temps .low { color: #3b82f6; }
-        .weather-desc { font-size: 11px; color: #64748b; }
-
-        .weather-loading {
-            font-size: 11px;
-            color: #94a3b8;
+        .transport-route-main {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-
-        .weather-loading .spinner {
-            width: 12px;
-            height: 12px;
-            border: 2px solid #e2e8f0;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .transport-city { font-size: 16px; font-weight: 700; color: #0f172a; }
+        .transport-arrow-main { font-size: 16px; color: #94a3b8; flex-shrink: 0; }
+        .transport-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
+        .transport-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12.5px;
+            color: #64748b;
         }
+        .transport-meta-item strong { color: #334155; font-weight: 600; }
+        .transport-times {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px dashed #eef2f6;
+            border-bottom: 1px dashed #eef2f6;
+            margin-bottom: 12px;
+        }
+        .transport-time-block { text-align: center; }
+        .transport-time-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
+        }
+        .transport-time-label { font-size: 10.5px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+        .transport-duration {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+            padding: 0 8px;
+        }
+        .transport-duration-line {
+            width: 100%;
+            height: 2px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            position: relative;
+        }
+        .transport-duration-line::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid #cbd5e1;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        .transport-duration-text { font-size: 11px; color: #94a3b8; font-weight: 600; white-space: nowrap; }
+        .transport-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .transport-note { font-size: 11.5px; color: #94a3b8; line-height: 1.4; flex: 1; }
+        .transport-book-link {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+            white-space: nowrap;
+            padding: 6px 12px;
+            background: #eff6ff;
+            border-radius: 999px;
+            border: 1px solid #bfdbfe;
+            flex-shrink: 0;
+        }
+        .transport-book-link:active { background: #dbeafe; }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .weather-unavailable { font-size: 11px; color: #cbd5e1; }
-
-        /* ============ 每日行程完整卡片 ============ */
+        /* 每日行程 */
         .timeline { display: flex; flex-direction: column; gap: 16px; }
-
         .day-card {
             background: white;
             border-radius: 24px;
-            padding: 18px 16px 16px;
+            padding: 18px 16px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
             border: 1px solid #e9eef3;
+            transition: padding 0.25s ease;
         }
-
+        .day-card.collapsed { padding: 14px 16px; }
         .day-header {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            gap: 8px;
         }
-
-        .day-badge { font-weight: 800; font-size: 18px; color: #0f172a; }
-
+        .day-header-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .day-header-right { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .day-badge { font-weight: 800; font-size: 17px; color: #0f172a; white-space: nowrap; }
         .day-date {
-            font-size: 13px;
+            font-size: 12px;
             color: #64748b;
             background: #f1f5f9;
-            padding: 2px 10px;
+            padding: 2px 9px;
             border-radius: 999px;
             font-weight: 500;
+            white-space: nowrap;
         }
-
-        .day-route {
-            font-size: 14px;
+        .day-city {
+            font-size: 13px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .day-route span {
-            background: #eef2f6;
-            padding: 2px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 500;
             color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+        .day-arrow {
+            font-size: 11px;
+            color: #94a3b8;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+        .day-card.collapsed .day-arrow { transform: rotate(-90deg); }
+        .day-body { margin-top: 14px; }
+        .day-card.collapsed .day-body { display: none; }
 
         .timeline-items {
             display: flex;
@@ -489,9 +774,7 @@
             padding-left: 14px;
             margin-left: 6px;
         }
-
         .time-item { display: flex; gap: 12px; font-size: 14px; align-items: baseline; }
-
         .time-stamp {
             font-weight: 600;
             color: #0f172a;
@@ -499,7 +782,6 @@
             font-variant-numeric: tabular-nums;
             font-size: 13px;
         }
-
         .time-desc { color: #334155; flex: 1; }
 
         .day-map {
@@ -511,6 +793,63 @@
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
+        .day-map-marker,
+        .day-map-label {
+            background: transparent !important;
+            border: none !important;
+        }
+        .leaflet-container {
+            font-family: inherit;
+            border-radius: 18px;
+        }
+        .leaflet-popup-content {
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 8px 12px;
+            font-family: inherit;
+        }
+
+        .day-weather {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #eef2f6;
+        }
+        .day-weather .weather-icon { font-size: 24px; line-height: 1; flex-shrink: 0; }
+        .day-weather .weather-info { display: flex; flex-direction: column; gap: 2px; }
+        .day-weather .weather-temps {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .day-weather .weather-temps .high { color: #ef4444; }
+        .day-weather .weather-temps .sep { color: #cbd5e1; font-weight: 400; }
+        .day-weather .weather-temps .low { color: #3b82f6; }
+        .day-weather .weather-desc { font-size: 11.5px; color: #64748b; }
+        .day-weather .weather-loading {
+            font-size: 12px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .day-weather .weather-loading .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .day-weather .weather-unavailable { font-size: 11.5px; color: #cbd5e1; }
 
         .day-tip {
             background: #fffbeb;
@@ -524,7 +863,6 @@
             align-items: flex-start;
             margin-top: 6px;
         }
-
         .day-tip .emoji { font-size: 16px; line-height: 1.2; }
 
         .booking-links {
@@ -539,9 +877,7 @@
             flex-direction: column;
             gap: 6px;
         }
-
         .booking-links .label { font-weight: 600; color: #1e3a8a; display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
-
         .booking-links a {
             color: #2563eb;
             text-decoration: none;
@@ -551,10 +887,8 @@
             gap: 6px;
             line-height: 1.4;
         }
-
         .booking-links a::before { content: "🔗"; font-size: 11px; flex-shrink: 0; }
 
-        /* ============ 准备页折叠面板 ============ */
         .accordion {
             background: white;
             border-radius: 20px;
@@ -563,7 +897,6 @@
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         }
-
         .accordion-header {
             display: flex;
             align-items: center;
@@ -576,27 +909,21 @@
             color: #0f172a;
             background: white;
         }
-
         .accordion-header .left { display: flex; align-items: center; gap: 8px; }
         .accordion-header .icon { font-size: 18px; }
-
         .accordion-arrow {
             font-size: 12px;
             color: #94a3b8;
             transition: transform 0.25s ease;
         }
-
         .accordion.open .accordion-arrow { transform: rotate(180deg); }
-
         .accordion-body {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.35s ease;
             background: #fafbfd;
         }
-
         .accordion.open .accordion-body { max-height: 2500px; }
-
         .accordion-inner { padding: 8px 18px 18px; }
 
         .checklist-item {
@@ -608,9 +935,7 @@
             cursor: pointer;
             user-select: none;
         }
-
         .checklist-item:last-child { border-bottom: none; }
-
         .checklist-item input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
@@ -625,12 +950,10 @@
             transition: all 0.15s ease;
             background: white;
         }
-
         .checklist-item input[type="checkbox"]:checked {
             background: #10b981;
             border-color: #10b981;
         }
-
         .checklist-item input[type="checkbox"]:checked::after {
             content: "✓";
             position: absolute;
@@ -642,19 +965,16 @@
             font-weight: 900;
             line-height: 1;
         }
-
         .checklist-text {
             font-size: 14px;
             color: #334155;
             line-height: 1.45;
             flex: 1;
         }
-
         .checklist-item input:checked ~ .checklist-text {
             text-decoration: line-through;
             color: #94a3b8;
         }
-
         .checklist-cat {
             font-size: 11px;
             font-weight: 700;
@@ -663,7 +983,6 @@
             letter-spacing: 0.5px;
             padding: 14px 0 4px;
         }
-
         .checklist-cat:first-child { padding-top: 4px; }
 
         .prep-link {
@@ -677,20 +996,12 @@
             font-size: 13.5px;
             line-height: 1.45;
         }
-
         .prep-link:last-child { border-bottom: none; }
-
         .prep-link .emoji { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
         .prep-link .text { flex: 1; }
         .prep-link .text small { display: block; color: #94a3b8; font-size: 11.5px; margin-top: 2px; }
 
-        /* ============ 记账页 ============ */
-        .ledger-summary {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-
+        .ledger-summary { display: flex; gap: 10px; margin-bottom: 18px; }
         .ledger-summary-card {
             flex: 1;
             background: linear-gradient(145deg, #0b1e33, #1a2f4a);
@@ -699,7 +1010,6 @@
             padding: 16px 14px;
             box-shadow: 0 10px 20px -8px rgba(0, 20, 40, 0.35);
         }
-
         .ledger-summary-card .label {
             font-size: 11px;
             color: #94a3b8;
@@ -708,7 +1018,6 @@
             letter-spacing: 0.5px;
             margin-bottom: 6px;
         }
-
         .ledger-summary-card .value {
             font-size: 24px;
             font-weight: 800;
@@ -716,13 +1025,7 @@
             color: #f8fafc;
             font-variant-numeric: tabular-nums;
         }
-
-        .ledger-summary-card .value .currency {
-            font-size: 14px;
-            color: #94a3b8;
-            font-weight: 600;
-            margin-right: 2px;
-        }
+        .ledger-summary-card .value .currency { font-size: 14px; color: #94a3b8; font-weight: 600; margin-right: 2px; }
 
         .ledger-form-card {
             background: white;
@@ -732,7 +1035,6 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         }
-
         .ledger-form-title {
             font-size: 14px;
             font-weight: 700;
@@ -742,9 +1044,7 @@
             align-items: center;
             gap: 6px;
         }
-
         .ledger-form-row { margin-bottom: 12px; }
-
         .ledger-form-row label {
             display: block;
             font-size: 12px;
@@ -752,9 +1052,9 @@
             color: #64748b;
             margin-bottom: 6px;
         }
-
         .ledger-form-row input[type="datetime-local"],
         .ledger-form-row input[type="number"],
+        .ledger-form-row input[type="text"],
         .ledger-form-row select {
             width: 100%;
             padding: 11px 14px;
@@ -765,50 +1065,19 @@
             outline: none;
             font-family: inherit;
             background: #fafbfd;
-            transition: border-color 0.15s ease, background 0.15s ease;
             font-variant-numeric: tabular-nums;
         }
-
-        .ledger-form-row input[type="datetime-local"]:focus,
-        .ledger-form-row input[type="number"]:focus,
-        .ledger-form-row select:focus {
-            border-color: #3b82f6;
-            background: white;
-        }
-
-        /* 金额 + 货币行 */
-        .amount-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .currency-select {
-            flex: 0 0 110px;
-            font-weight: 700 !important;
-            cursor: pointer;
-        }
-
-        .amount-row input[type="number"] {
-            flex: 1;
-        }
-
-        .currency-convert {
-            font-size: 11.5px;
-            color: #64748b;
-            margin-top: 6px;
-            min-height: 14px;
-            padding-left: 2px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .person-toggle {
-            display: flex;
-            gap: 8px;
-        }
-
+        .ledger-form-row input:focus,
+        .ledger-form-row select:focus { border-color: #3b82f6; background: white; }
+        .amount-row { display: flex; gap: 8px; }
+        .currency-select { flex: 0 0 110px; font-weight: 700 !important; cursor: pointer; }
+        .amount-row input[type="number"] { flex: 1; }
+        .currency-convert { font-size: 11.5px; color: #64748b; margin-top: 6px; min-height: 14px; padding-left: 2px; }
+        .person-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
         .person-btn {
             flex: 1;
-            padding: 11px 0;
+            min-width: 0;
+            padding: 11px 8px;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             background: #fafbfd;
@@ -817,23 +1086,21 @@
             font-weight: 600;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.15s ease;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-
-        .person-btn.active[data-person="夹夹"] {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        .person-btn.active { color: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); }
+        .no-travelers-hint {
+            width: 100%;
+            padding: 12px 14px;
+            background: #fffbeb;
+            border: 1px dashed #fbbf24;
+            border-radius: 12px;
+            font-size: 12.5px;
+            color: #92400e;
+            text-align: center;
         }
-
-        .person-btn.active[data-person="纯纯"] {
-            border-color: #f5576c;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-            box-shadow: 0 4px 10px rgba(245, 87, 108, 0.3);
-        }
-
         .split-display {
             padding: 11px 14px;
             background: #f0f7ff;
@@ -843,13 +1110,7 @@
             font-weight: 600;
             border: 1px dashed #bfdbfe;
         }
-
-        .split-display .amount {
-            color: #2563eb;
-            font-weight: 800;
-            font-size: 15px;
-        }
-
+        .split-display .amount { color: #2563eb; font-weight: 800; font-size: 15px; }
         .ledger-add-btn {
             width: 100%;
             margin-top: 6px;
@@ -862,56 +1123,26 @@
             font-weight: 700;
             cursor: pointer;
             font-family: inherit;
-            letter-spacing: 0.3px;
-            transition: transform 0.15s ease;
         }
-
         .ledger-add-btn:active { transform: scale(0.98); }
+        .ledger-error { font-size: 12px; color: #ef4444; margin-top: 8px; height: 14px; text-align: center; }
 
-        .ledger-error {
-            font-size: 12px;
-            color: #ef4444;
-            margin-top: 8px;
-            height: 14px;
-            text-align: center;
-        }
-
-        /* 每日总结 */
         .ledger-day-card {
             background: white;
             border-radius: 18px;
             border: 1px solid #e9eef3;
             padding: 14px 16px;
             margin-bottom: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
-
         .ledger-day-header {
             display: flex;
             align-items: baseline;
             justify-content: space-between;
             margin-bottom: 4px;
         }
-
-        .ledger-day-date {
-            font-size: 14px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .ledger-day-total {
-            font-size: 13px;
-            font-weight: 700;
-            color: #2563eb;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .ledger-day-per {
-            font-size: 11.5px;
-            color: #64748b;
-            margin-bottom: 10px;
-        }
-
+        .ledger-day-date { font-size: 14px; font-weight: 700; color: #0f172a; }
+        .ledger-day-total { font-size: 13px; font-weight: 700; color: #2563eb; font-variant-numeric: tabular-nums; }
+        .ledger-day-per { font-size: 11.5px; color: #64748b; margin-bottom: 10px; }
         .ledger-day-items {
             border-top: 1px dashed #eef2f6;
             padding-top: 8px;
@@ -919,42 +1150,14 @@
             flex-direction: column;
             gap: 6px;
         }
+        .ledger-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+        .ledger-item-time { color: #94a3b8; font-variant-numeric: tabular-nums; min-width: 42px; flex-shrink: 0; }
+        .ledger-item-desc { flex: 1; display: flex; align-items: baseline; gap: 6px; min-width: 0; overflow: hidden; }
+        .ledger-item-person { font-weight: 700; flex-shrink: 0; }
+        .ledger-item-note { color: #94a3b8; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ledger-item-amount { margin-left: auto; font-weight: 600; color: #334155; text-align: right; font-size: 12px; flex-shrink: 0; }
+        .ledger-item-amount .cny-eq { display: block; color: #94a3b8; font-size: 10.5px; font-weight: 500; }
 
-        .ledger-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12.5px;
-        }
-
-        .ledger-item-time {
-            color: #94a3b8;
-            font-variant-numeric: tabular-nums;
-            min-width: 42px;
-        }
-
-        .ledger-item-person {
-            font-weight: 700;
-            min-width: 34px;
-        }
-
-        .ledger-item-amount {
-            margin-left: auto;
-            font-weight: 600;
-            color: #334155;
-            font-variant-numeric: tabular-nums;
-            text-align: right;
-            font-size: 12px;
-        }
-
-        .ledger-item-amount .cny-eq {
-            display: block;
-            color: #94a3b8;
-            font-size: 10.5px;
-            font-weight: 500;
-        }
-
-        /* 全部记录 */
         .ledger-record {
             background: white;
             border-radius: 16px;
@@ -964,47 +1167,14 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.015);
         }
-
-        .ledger-record-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            min-width: 0;
-        }
-
-        .ledger-record-person {
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .ledger-record-time {
-            font-size: 11.5px;
-            color: #94a3b8;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .ledger-record-right {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .ledger-record-amount {
-            font-size: 15px;
-            font-weight: 800;
-            color: #0f172a;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .ledger-record-share {
-            font-size: 11px;
-            color: #64748b;
-        }
-
+        .ledger-record-main { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .ledger-record-person { font-size: 14px; font-weight: 700; }
+        .ledger-record-time { font-size: 11.5px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+        .ledger-record-note { font-size: 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ledger-record-right { text-align: right; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+        .ledger-record-amount { font-size: 15px; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
+        .ledger-record-share { font-size: 11px; color: #64748b; }
         .ledger-record-delete {
             width: 28px;
             height: 28px;
@@ -1023,17 +1193,8 @@
             line-height: 1;
             padding-bottom: 2px;
         }
+        .ledger-empty { text-align: center; padding: 28px 0; color: #cbd5e1; font-size: 13px; }
 
-        .ledger-record-delete:active { background: #fecaca; }
-
-        .ledger-empty {
-            text-align: center;
-            padding: 28px 0;
-            color: #cbd5e1;
-            font-size: 13px;
-        }
-
-        /* ============ 底部导航栏 ============ */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -1048,7 +1209,6 @@
             padding-bottom: env(safe-area-inset-bottom, 0);
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
         }
-
         .nav-btn {
             flex: 1;
             background: transparent;
@@ -1064,22 +1224,10 @@
             transition: color 0.2s ease;
             position: relative;
         }
-
-        .nav-btn .nav-icon {
-            font-size: 19px;
-            line-height: 1;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-btn .nav-label {
-            font-size: 10.5px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-
+        .nav-btn .nav-icon { font-size: 19px; line-height: 1; transition: transform 0.2s ease; }
+        .nav-btn .nav-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.2px; }
         .nav-btn.active { color: #2563eb; }
         .nav-btn.active .nav-icon { transform: translateY(-1px) scale(1.08); }
-
         .nav-btn.active::before {
             content: "";
             position: absolute;
@@ -1102,18 +1250,21 @@
             border: 1px solid #e9eef3;
             line-height: 1.6;
         }
-
         .footer-note a { color: #2563eb; text-decoration: none; word-break: break-all; }
 
         ::-webkit-scrollbar { width: 0; background: transparent; }
 
         @media (max-width: 380px) {
             .flight-route { font-size: 14px; }
-            .countdown-big .days { font-size: 28px; }
             .time-stamp { min-width: 52px; font-size: 12px; }
             .ledger-summary-card .value { font-size: 20px; }
-            .nav-btn .nav-label { font-size: 10px; }
+            .nav-btn .nav-label { font-size: 9.5px; }
             .currency-select { flex: 0 0 96px; font-size: 13px !important; }
+            .clock-time { font-size: 22px; }
+            .day-city { font-size: 12px; }
+            .transport-header-route { font-size: 12px; }
+            .hotel-header-name { font-size: 12px; }
+            .transport-countdown .cd-days { font-size: 18px; }
         }
     </style>
 </head>
@@ -1125,7 +1276,7 @@
             <div class="password-title">俄罗斯三城 7 日游</div>
             <div class="password-sub">请输入访问密码</div>
             <input type="password" id="passwordInput" class="password-input" inputmode="numeric" maxlength="6" placeholder="输入密码" autocomplete="off">
-            <button class="password-btn" id="passwordBtn">进入行程</button>
+            <button class="password-btn" id="passwordBtn" type="button">进入行程</button>
             <div class="password-error" id="passwordError">密码错误，请重试</div>
         </div>
     </div>
@@ -1135,10 +1286,6 @@
             <div class="header-title">俄罗斯三城 7 日游</div>
             <div class="header-sub">莫斯科 · 摩尔曼斯克 · 圣彼得堡 | 10/1–10/7</div>
         </div>
-        <div class="countdown-pill" id="headerCountdown">
-            <span class="dot"></span>
-            <span id="headerCountdownText">距出发 15 天</span>
-        </div>
     </header>
 
     <main class="container">
@@ -1146,24 +1293,31 @@
         <!-- ==================== Tab 1: 概览 ==================== -->
         <div class="tab-content active" id="tab-overview">
 
-            <div class="travelers-card">
-                <div class="travelers-label">出行人员</div>
-                <div class="travelers-list">
-                    <div class="traveler">
-                        <div class="traveler-avatar jiajia">夹</div>
-                        <div class="traveler-name">夹夹</div>
-                    </div>
-                    <div class="traveler">
-                        <div class="traveler-avatar chunchun">纯</div>
-                        <div class="traveler-name">纯纯</div>
-                    </div>
+            <div class="clocks-card">
+                <div class="clock-item">
+                    <div class="clock-label"><span class="flag">🇨🇳</span> 北京时间</div>
+                    <div class="clock-time" id="clockBeijing">--:--</div>
+                    <div class="clock-date" id="dateBeijing">--</div>
                 </div>
+                <div class="clock-item">
+                    <div class="clock-label"><span class="flag">🇷🇺</span> 俄罗斯时间</div>
+                    <div class="clock-time" id="clockMoscow">--:--</div>
+                    <div class="clock-date" id="dateMoscow">--</div>
+                </div>
+            </div>
+
+            <div class="travelers-card">
+                <div class="travelers-header">
+                    <div class="travelers-label">出行人员</div>
+                    <button class="add-traveler-btn" id="addTravelerBtn" type="button">+ 添加</button>
+                </div>
+                <div class="travelers-list" id="travelersList"></div>
             </div>
 
             <section id="flight" class="flight-hero">
                 <div class="flight-tabs">
-                    <button class="flight-tab active" data-slide="0">✈️ 去程</button>
-                    <button class="flight-tab" data-slide="1">✈️ 返程</button>
+                    <button class="flight-tab active" data-slide="0" type="button">✈️ 去程</button>
+                    <button class="flight-tab" data-slide="1" type="button">✈️ 返程</button>
                 </div>
                 <div class="flight-slider" id="flightSlider">
                     <div class="flight-slide">
@@ -1172,11 +1326,6 @@
                             广州 CAN 08:55 <span class="arrow">→</span> 莫斯科 SVO 14:05
                         </div>
                         <div class="flight-time">飞行约 10 小时</div>
-                        <div class="countdown-big">
-                            <span class="label">距出发</span>
-                            <span class="days" id="departDays">15</span>
-                            <span class="unit">天</span>
-                        </div>
                     </div>
                     <div class="flight-slide">
                         <div class="flight-code">CZ656 · 10月7日</div>
@@ -1184,11 +1333,6 @@
                             莫斯科 SVO 21:15 <span class="arrow">→</span> 广州 CAN 次日 11:40
                         </div>
                         <div class="flight-time">飞行约 9 小时 25 分钟</div>
-                        <div class="countdown-big">
-                            <span class="label">距返程</span>
-                            <span class="days" id="returnDays">21</span>
-                            <span class="unit">天</span>
-                        </div>
                     </div>
                 </div>
                 <div class="slide-dots" id="slideDots">
@@ -1208,271 +1352,612 @@
                 </div>
             </div>
 
-            <div class="section-title" style="margin-top: 8px;">📋 每日概览</div>
-            <div class="overview-days">
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 1</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">广州 → 莫斯科</div>
-                        <div class="overview-day-summary">08:55 起飞 · 14:05 落地 · 傍晚红场 & 圣瓦西里大教堂</div>
-                        <div class="overview-day-date">10/1 周四</div>
-                        <div class="overview-day-weather" data-city="moscow" data-date="10-01">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+            <div class="section-title">🏨 酒店信息</div>
+
+            <div class="hotel-card" data-checkout="2026-10-02T12:00:00+03:00">
+                <div class="hotel-header" onclick="toggleHotelCard(this)">
+                    <div class="hotel-header-left">
+                        <span class="hotel-date-badge">10/1 – 10/2</span>
+                        <span class="hotel-stay-dates">1 晚</span>
+                    </div>
+                    <div class="hotel-header-right">
+                        <span class="hotel-header-name">Glenver Garden Hotel</span>
+                        <span class="hotel-arrow">▼</span>
                     </div>
                 </div>
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 2</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">莫斯科 → 摩尔曼斯克</div>
-                        <div class="overview-day-summary">上午克里姆林宫 · 17:55 飞摩尔曼斯克 · 20:25 抵达</div>
-                        <div class="overview-day-date">10/2 周五</div>
-                        <div class="overview-day-weather" data-city="moscow" data-date="10-02">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+                <div class="hotel-body">
+                    <div class="hotel-name">莫斯科 Glenver Garden Hotel</div>
+                    <div class="hotel-room-type">🛏️ 标准双人间</div>
+                    <div class="hotel-address">
+                        <span class="emoji">📍</span>
+                        <span>Kozhevnicheskaya Ulitsa, 4, Moscow, 115114, 俄罗斯<br>（地铁 Paveletskaya 站步行 1 分钟）</span>
                     </div>
                 </div>
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 3</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">摩尔曼斯克 · 极光</div>
-                        <div class="overview-day-summary">列宁号破冰船 · 萨米民族村 · 夜间捷里别尔卡追光</div>
-                        <div class="overview-day-date">10/3 周六</div>
-                        <div class="overview-day-weather" data-city="murmansk" data-date="10-03">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+            </div>
+
+            <div class="hotel-card" data-checkout="2026-10-04T12:00:00+03:00">
+                <div class="hotel-header" onclick="toggleHotelCard(this)">
+                    <div class="hotel-header-left">
+                        <span class="hotel-date-badge">10/2 – 10/4</span>
+                        <span class="hotel-stay-dates">2 晚</span>
+                    </div>
+                    <div class="hotel-header-right">
+                        <span class="hotel-header-name">Meridian 会议酒店</span>
+                        <span class="hotel-arrow">▼</span>
                     </div>
                 </div>
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 4</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">摩尔曼斯克 → 圣彼得堡</div>
-                        <div class="overview-day-summary">阿廖沙纪念碑 · 19:15 飞圣彼得堡 · 21:15 抵达</div>
-                        <div class="overview-day-date">10/4 周日</div>
-                        <div class="overview-day-weather" data-city="murmansk" data-date="10-04">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+                <div class="hotel-body">
+                    <div class="hotel-name">摩尔曼斯克 Meridian 会议酒店</div>
+                    <div class="hotel-room-type">🛏️ 标准高级双床房</div>
+                    <div class="hotel-address">
+                        <span class="emoji">📍</span>
+                        <span>5/23 Vorovskogo Street, Murmansk, 183038, 俄罗斯<br>（市中心，近火车站和五角广场）</span>
                     </div>
                 </div>
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 5</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">圣彼得堡 · 市区游</div>
-                        <div class="overview-day-summary">滴血救世主教堂 · 喀山大教堂 · 俄罗斯博物馆 · 涅瓦大街</div>
-                        <div class="overview-day-date">10/5 周一</div>
-                        <div class="overview-day-weather" data-city="spb" data-date="10-05">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+            </div>
+
+            <div class="hotel-card" data-checkout="2026-10-06T12:00:00+03:00">
+                <div class="hotel-header" onclick="toggleHotelCard(this)">
+                    <div class="hotel-header-left">
+                        <span class="hotel-date-badge">10/4 – 10/6</span>
+                        <span class="hotel-stay-dates">2 晚</span>
+                    </div>
+                    <div class="hotel-header-right">
+                        <span class="hotel-header-name">丽笙皇家酒店</span>
+                        <span class="hotel-arrow">▼</span>
                     </div>
                 </div>
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 6</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">圣彼得堡 → 莫斯科</div>
-                        <div class="overview-day-summary">上午冬宫 · 15:00 高铁返莫斯科 · 19:00 抵达</div>
-                        <div class="overview-day-date">10/6 周二</div>
-                        <div class="overview-day-weather" data-city="spb" data-date="10-06">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+                <div class="hotel-body">
+                    <div class="hotel-name">圣彼得堡丽笙皇家酒店</div>
+                    <div class="hotel-room-type">🛏️ 高级房</div>
+                    <div class="hotel-address">
+                        <span class="emoji">📍</span>
+                        <span>Nevsky pr., 49/2, 191025, St Petersburg, 俄罗斯<br>（涅瓦大街核心位置，近莫斯科火车站）</span>
                     </div>
                 </div>
-                <div class="overview-day">
-                    <div class="overview-day-num">Day 7</div>
-                    <div class="overview-day-body">
-                        <div class="overview-day-title">莫斯科 → 广州</div>
-                        <div class="overview-day-summary">地铁巡游 · 阿尔巴特大街 · 21:15 返程广州</div>
-                        <div class="overview-day-date">10/7 周三</div>
-                        <div class="overview-day-weather" data-city="moscow" data-date="10-07">
-                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
-                        </div>
+            </div>
+
+            <div class="hotel-card" data-checkout="2026-10-07T12:00:00+03:00">
+                <div class="hotel-header" onclick="toggleHotelCard(this)">
+                    <div class="hotel-header-left">
+                        <span class="hotel-date-badge">10/6 – 10/7</span>
+                        <span class="hotel-stay-dates">1 晚</span>
+                    </div>
+                    <div class="hotel-header-right">
+                        <span class="hotel-header-name">谢列梅捷沃机场智选假日酒店</span>
+                        <span class="hotel-arrow">▼</span>
+                    </div>
+                </div>
+                <div class="hotel-body">
+                    <div class="hotel-name">莫斯科谢列梅捷沃机场智选假日酒店</div>
+                    <div class="hotel-room-type">🛏️ 豪华标准房</div>
+                    <div class="hotel-address">
+                        <span class="emoji">📍</span>
+                        <span>Mezhdunarodnoe Shosse, Building 1V, Sheremetyevo Transport Zone, Khimki, Moscow Region, 141425, 俄罗斯<br>（SVO 机场内，步行可达航站楼）</span>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- ==================== Tab 2: 行程 ==================== -->
+        <!-- ==================== Tab 2: 交通（含倒计时） ==================== -->
+        <div class="tab-content" id="tab-transport">
+            <div class="section-title" style="margin-bottom: 14px;">🚆 交通行程</div>
+            <div class="transport-list">
+
+                <div class="transport-card" data-depart="2026-10-01T08:55:00+08:00" data-arrive="2026-10-01T19:05:00+08:00">
+                    <div class="transport-card-header" onclick="toggleTransportCard(this)">
+                        <div class="transport-header-left">
+                            <span class="transport-day-badge">Day 1</span>
+                            <span class="transport-date-text">10/1 周四</span>
+                        </div>
+                        <div class="transport-header-right">
+                            <span class="transport-header-route">广州 → 莫斯科</span>
+                            <span class="transport-type-icon">✈️</span>
+                            <span class="transport-arrow">▼</span>
+                        </div>
+                    </div>
+                    <div class="transport-card-body">
+                        <div class="transport-countdown" data-depart="2026-10-01T08:55:00+08:00">
+                            <span class="cd-icon">⏳</span>
+                            <span class="cd-label">距出发</span>
+                            <span class="cd-days">--</span>
+                            <span class="cd-unit">天</span>
+                        </div>
+                        <div class="transport-route-main">
+                            <span class="transport-city">广州</span>
+                            <span class="transport-arrow-main">→</span>
+                            <span class="transport-city">莫斯科</span>
+                        </div>
+                        <div class="transport-meta">
+                            <div class="transport-meta-item">航班 <strong>CZ8027</strong></div>
+                            <div class="transport-meta-item">南方航空</div>
+                            <div class="transport-meta-item">直飞</div>
+                        </div>
+                        <div class="transport-times">
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">08:55</div>
+                                <div class="transport-time-label">广州白云 CAN</div>
+                            </div>
+                            <div class="transport-duration">
+                                <div class="transport-duration-line"></div>
+                                <div class="transport-duration-text">约 10 小时</div>
+                            </div>
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">14:05</div>
+                                <div class="transport-time-label">莫斯科 SVO</div>
+                            </div>
+                        </div>
+                        <div class="transport-footer">
+                            <div class="transport-note">落地后乘机场快线至白俄罗斯站，约 50 分钟</div>
+                            <a class="transport-book-link" href="https://www.csair.com" target="_blank">官网</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transport-card" data-depart="2026-10-02T17:55:00+08:00" data-arrive="2026-10-03T01:25:00+08:00">
+                    <div class="transport-card-header" onclick="toggleTransportCard(this)">
+                        <div class="transport-header-left">
+                            <span class="transport-day-badge">Day 2</span>
+                            <span class="transport-date-text">10/2 周五</span>
+                        </div>
+                        <div class="transport-header-right">
+                            <span class="transport-header-route">莫斯科 → 摩尔曼斯克</span>
+                            <span class="transport-type-icon">✈️</span>
+                            <span class="transport-arrow">▼</span>
+                        </div>
+                    </div>
+                    <div class="transport-card-body">
+                        <div class="transport-countdown" data-depart="2026-10-02T17:55:00+08:00">
+                            <span class="cd-icon">⏳</span>
+                            <span class="cd-label">距出发</span>
+                            <span class="cd-days">--</span>
+                            <span class="cd-unit">天</span>
+                        </div>
+                        <div class="transport-route-main">
+                            <span class="transport-city">莫斯科</span>
+                            <span class="transport-arrow-main">→</span>
+                            <span class="transport-city">摩尔曼斯克</span>
+                        </div>
+                        <div class="transport-meta">
+                            <div class="transport-meta-item">航班 <strong>SU1326</strong></div>
+                            <div class="transport-meta-item">俄罗斯航空</div>
+                            <div class="transport-meta-item">直飞</div>
+                        </div>
+                        <div class="transport-times">
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">17:55</div>
+                                <div class="transport-time-label">莫斯科 SVO</div>
+                            </div>
+                            <div class="transport-duration">
+                                <div class="transport-duration-line"></div>
+                                <div class="transport-duration-text">约 2.5 小时</div>
+                            </div>
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">20:25</div>
+                                <div class="transport-time-label">摩尔曼斯克 MMK</div>
+                            </div>
+                        </div>
+                        <div class="transport-footer">
+                            <div class="transport-note">白天游览克里姆林宫后，15:00 前往机场</div>
+                            <a class="transport-book-link" href="https://www.aeroflot.ru" target="_blank">官网</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transport-card" data-depart="2026-10-04T19:15:00+08:00" data-arrive="2026-10-05T02:15:00+08:00">
+                    <div class="transport-card-header" onclick="toggleTransportCard(this)">
+                        <div class="transport-header-left">
+                            <span class="transport-day-badge">Day 4</span>
+                            <span class="transport-date-text">10/4 周日</span>
+                        </div>
+                        <div class="transport-header-right">
+                            <span class="transport-header-route">摩尔曼斯克 → 圣彼得堡</span>
+                            <span class="transport-type-icon">✈️</span>
+                            <span class="transport-arrow">▼</span>
+                        </div>
+                    </div>
+                    <div class="transport-card-body">
+                        <div class="transport-countdown" data-depart="2026-10-04T19:15:00+08:00">
+                            <span class="cd-icon">⏳</span>
+                            <span class="cd-label">距出发</span>
+                            <span class="cd-days">--</span>
+                            <span class="cd-unit">天</span>
+                        </div>
+                        <div class="transport-route-main">
+                            <span class="transport-city">摩尔曼斯克</span>
+                            <span class="transport-arrow-main">→</span>
+                            <span class="transport-city">圣彼得堡</span>
+                        </div>
+                        <div class="transport-meta">
+                            <div class="transport-meta-item">航班 <strong>SU6346</strong></div>
+                            <div class="transport-meta-item">俄罗斯航空</div>
+                            <div class="transport-meta-item">直飞</div>
+                        </div>
+                        <div class="transport-times">
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">19:15</div>
+                                <div class="transport-time-label">摩尔曼斯克 MMK</div>
+                            </div>
+                            <div class="transport-duration">
+                                <div class="transport-duration-line"></div>
+                                <div class="transport-duration-text">约 2 小时</div>
+                            </div>
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">21:15</div>
+                                <div class="transport-time-label">圣彼得堡 LED</div>
+                            </div>
+                        </div>
+                        <div class="transport-footer">
+                            <div class="transport-note">上午游阿廖沙纪念碑，下午 14:30 前往机场</div>
+                            <a class="transport-book-link" href="https://www.aeroflot.ru" target="_blank">官网</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transport-card" data-depart="2026-10-06T16:17:00+08:00" data-arrive="2026-10-07T01:27:00+08:00">
+                    <div class="transport-card-header" onclick="toggleTransportCard(this)">
+                        <div class="transport-header-left">
+                            <span class="transport-day-badge">Day 6</span>
+                            <span class="transport-date-text">10/6 周二</span>
+                        </div>
+                        <div class="transport-header-right">
+                            <span class="transport-header-route">圣彼得堡 → 莫斯科</span>
+                            <span class="transport-type-icon">🚄</span>
+                            <span class="transport-arrow">▼</span>
+                        </div>
+                    </div>
+                    <div class="transport-card-body">
+                        <div class="transport-countdown" data-depart="2026-10-06T16:17:00+08:00">
+                            <span class="cd-icon">⏳</span>
+                            <span class="cd-label">距出发</span>
+                            <span class="cd-days">--</span>
+                            <span class="cd-unit">天</span>
+                        </div>
+                        <div class="transport-route-main">
+                            <span class="transport-city">圣彼得堡</span>
+                            <span class="transport-arrow-main">→</span>
+                            <span class="transport-city">莫斯科</span>
+                        </div>
+                        <div class="transport-meta">
+                            <div class="transport-meta-item">车次 <strong>Sapsan 775A</strong></div>
+                            <div class="transport-meta-item">高铁</div>
+                            <div class="transport-meta-item">直达</div>
+                        </div>
+                        <div class="transport-times">
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">16:17</div>
+                                <div class="transport-time-label">莫斯科火车站</div>
+                            </div>
+                            <div class="transport-duration">
+                                <div class="transport-duration-line"></div>
+                                <div class="transport-duration-text">约 4h10m</div>
+                            </div>
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">20:27</div>
+                                <div class="transport-time-label">列宁格勒站</div>
+                            </div>
+                        </div>
+                        <div class="transport-footer">
+                            <div class="transport-note">上午游冬宫，13:30 取行李前往火车站</div>
+                            <a class="transport-book-link" href="https://pass.rzd.ru" target="_blank">购票</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transport-card" data-depart="2026-10-07T21:15:00+08:00" data-arrive="2026-10-08T11:40:00+08:00">
+                    <div class="transport-card-header" onclick="toggleTransportCard(this)">
+                        <div class="transport-header-left">
+                            <span class="transport-day-badge">Day 7</span>
+                            <span class="transport-date-text">10/7 周三</span>
+                        </div>
+                        <div class="transport-header-right">
+                            <span class="transport-header-route">莫斯科 → 广州</span>
+                            <span class="transport-type-icon">✈️</span>
+                            <span class="transport-arrow">▼</span>
+                        </div>
+                    </div>
+                    <div class="transport-card-body">
+                        <div class="transport-countdown" data-depart="2026-10-07T21:15:00+08:00">
+                            <span class="cd-icon">⏳</span>
+                            <span class="cd-label">距出发</span>
+                            <span class="cd-days">--</span>
+                            <span class="cd-unit">天</span>
+                        </div>
+                        <div class="transport-route-main">
+                            <span class="transport-city">莫斯科</span>
+                            <span class="transport-arrow-main">→</span>
+                            <span class="transport-city">广州</span>
+                        </div>
+                        <div class="transport-meta">
+                            <div class="transport-meta-item">航班 <strong>CZ656</strong></div>
+                            <div class="transport-meta-item">南方航空</div>
+                            <div class="transport-meta-item">直飞</div>
+                        </div>
+                        <div class="transport-times">
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">21:15</div>
+                                <div class="transport-time-label">莫斯科 SVO</div>
+                            </div>
+                            <div class="transport-duration">
+                                <div class="transport-duration-line"></div>
+                                <div class="transport-duration-text">约 9.5 小时</div>
+                            </div>
+                            <div class="transport-time-block">
+                                <div class="transport-time-value">次日 11:40</div>
+                                <div class="transport-time-label">广州白云 CAN</div>
+                            </div>
+                        </div>
+                        <div class="transport-footer">
+                            <div class="transport-note">建议 15:00 前抵达机场，预留 3 小时</div>
+                            <a class="transport-book-link" href="https://www.csair.com" target="_blank">官网</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="footer-note" style="margin-top: 20px;">
+                <strong>📌 班次说明</strong><br>
+                · 莫斯科→摩尔曼斯克 SU1326 每日执飞，17:55 出发，20:25 抵达。<br>
+                · 摩尔曼斯克→圣彼得堡 SU6346 每日执飞，19:15 出发，21:15 抵达。<br>
+                · 圣彼得堡→莫斯科 Sapsan 775A 每日发车，16:17 出发，20:27 抵达，车程约 4 小时 10 分钟。<br>
+                · 以上时间为当地时间，莫斯科/圣彼得堡与北京时差 -5 小时。<br>
+                · 国内段航班建议提前 2 小时到机场，高铁建议提前 30 分钟到站。
+            </div>
+        </div>
+
+        <!-- ==================== Tab 3: 行程 ==================== -->
         <div class="tab-content" id="tab-itinerary">
             <div class="section-title" style="margin-bottom: 14px;">📅 每日详细行程</div>
             <div class="timeline" id="timeline">
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 1</span>
-                        <span class="day-date">10/1 周四</span>
+                <div class="day-card" data-day="1" data-date="2026-10-01">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 1</span>
+                            <span class="day-date">10/1 周四</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">广州 → 莫斯科</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">广州 → 莫斯科 <span>初探红场</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">08:55</span><span class="time-desc">广州白云起飞 CZ8027</span></div>
-                        <div class="time-item"><span class="time-stamp">14:05</span><span class="time-desc">落地莫斯科 SVO，入关取行李</span></div>
-                        <div class="time-item"><span class="time-stamp">15:30</span><span class="time-desc">机场快线 → 白俄罗斯站（约50分钟）</span></div>
-                        <div class="time-item"><span class="time-stamp">17:00</span><span class="time-desc">入住酒店，休整倒时差</span></div>
-                        <div class="time-item"><span class="time-stamp">18:00</span><span class="time-desc">红场 · 圣瓦西里大教堂（外观）</span></div>
-                        <div class="time-item"><span class="time-stamp">19:30</span><span class="time-desc">扎里亚季耶公园散步 · 晚餐</span></div>
-                        <div class="time-item"><span class="time-stamp">21:00</span><span class="time-desc">返回酒店休息</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">08:55</span><span class="time-desc">广州白云起飞 CZ8027</span></div>
+                            <div class="time-item"><span class="time-stamp">14:05</span><span class="time-desc">落地莫斯科 SVO，入关取行李</span></div>
+                            <div class="time-item"><span class="time-stamp">15:30</span><span class="time-desc">机场快线 → 白俄罗斯站（约50分钟）</span></div>
+                            <div class="time-item"><span class="time-stamp">17:00</span><span class="time-desc">入住 Glenver Garden Hotel，休整</span></div>
+                            <div class="time-item"><span class="time-stamp">18:00</span><span class="time-desc">红场 · 圣瓦西里大教堂（外观）</span></div>
+                            <div class="time-item"><span class="time-stamp">19:30</span><span class="time-desc">扎里亚季耶公园散步 · 晚餐</span></div>
+                            <div class="time-item"><span class="time-stamp">21:00</span><span class="time-desc">返回酒店休息</span></div>
+                        </div>
+                        <div class="day-map" id="map-day1"></div>
+                        <div class="day-weather" data-city="moscow" data-date="10-01">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.saint-basils-cathedral.ru" target="_blank">圣瓦西里大教堂官网（门票预约）</a>
+                            <a href="https://www.aeroexpress.ru" target="_blank">机场快线 Aeroexpress 官网</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> 免签入境，随身携带酒店订单和返程机票备查。建议提前注册YooMoney或携带美元现金。</div>
                     </div>
-                    <div class="day-map" id="map-day1"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.saint-basils-cathedral.ru" target="_blank">圣瓦西里大教堂官网（门票预约）</a>
-                        <a href="https://www.aeroexpress.ru" target="_blank">机场快线 Aeroexpress 官网</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> 免签入境，随身携带酒店订单和返程机票备查。建议提前注册YooMoney或携带美元现金。</div>
                 </div>
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 2</span>
-                        <span class="day-date">10/2 周五</span>
+                <div class="day-card" data-day="2" data-date="2026-10-02">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 2</span>
+                            <span class="day-date">10/2 周五</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">莫斯科 → 摩尔曼斯克</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">莫斯科 → 摩尔曼斯克 <span>克里姆林宫</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">07:30</span><span class="time-desc">早餐，退房寄存行李</span></div>
-                        <div class="time-item"><span class="time-stamp">09:00</span><span class="time-desc">克里姆林宫（教堂广场，约3小时）</span></div>
-                        <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">古姆百货午餐</span></div>
-                        <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">红场周边 · 列宁墓（周五闭馆，仅外观）</span></div>
-                        <div class="time-item"><span class="time-stamp">14:00</span><span class="time-desc">返回酒店取行李</span></div>
-                        <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">前往 SVO 机场</span></div>
-                        <div class="time-item"><span class="time-stamp">17:55</span><span class="time-desc">SU1326 飞往摩尔曼斯克</span></div>
-                        <div class="time-item"><span class="time-stamp">20:25</span><span class="time-desc">抵达摩尔曼斯克，入住酒店</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">07:30</span><span class="time-desc">早餐，退房寄存行李</span></div>
+                            <div class="time-item"><span class="time-stamp">09:00</span><span class="time-desc">克里姆林宫（教堂广场，约3小时）</span></div>
+                            <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">古姆百货午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">红场周边 · 列宁墓（周五闭馆，仅外观）</span></div>
+                            <div class="time-item"><span class="time-stamp">14:00</span><span class="time-desc">返回酒店取行李</span></div>
+                            <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">前往 SVO 机场</span></div>
+                            <div class="time-item"><span class="time-stamp">17:55</span><span class="time-desc">SU1326 飞往摩尔曼斯克</span></div>
+                            <div class="time-item"><span class="time-stamp">20:25</span><span class="time-desc">抵达摩尔曼斯克，入住 Meridian 会议酒店</span></div>
+                        </div>
+                        <div class="day-map" id="map-day2"></div>
+                        <div class="day-weather" data-city="moscow" data-date="10-02">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.kreml.ru" target="_blank">克里姆林宫官网（教堂/武器库门票）</a>
+                            <a href="https://www.aeroflot.ru" target="_blank">俄罗斯航空 Aeroflot 官网（SU1326）</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> 克里姆林宫周四闭馆。列宁墓周五闭馆，只能外观。莫斯科-摩尔曼斯克选飞机，火车需35小时。</div>
                     </div>
-                    <div class="day-map" id="map-day2"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.kreml.ru" target="_blank">克里姆林宫官网（教堂/武器库门票）</a>
-                        <a href="https://www.aeroflot.ru" target="_blank">俄罗斯航空 Aeroflot 官网（SU1326）</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> 克里姆林宫周四闭馆。列宁墓周五闭馆，只能外观。莫斯科-摩尔曼斯克选飞机，火车需35小时。</div>
                 </div>
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 3</span>
-                        <span class="day-date">10/3 周六</span>
+                <div class="day-card" data-day="3" data-date="2026-10-03">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 3</span>
+                            <span class="day-date">10/3 周六</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">摩尔曼斯克</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">摩尔曼斯克 <span>极光基地</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">08:30</span><span class="time-desc">早餐</span></div>
-                        <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">列宁号核动力破冰船（需预约场次）</span></div>
-                        <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">午餐</span></div>
-                        <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">萨米民族村 · 驯鹿拉雪橇（车程约1h）</span></div>
-                        <div class="time-item"><span class="time-stamp">17:00</span><span class="time-desc">返回市区，晚餐</span></div>
-                        <div class="time-item"><span class="time-stamp">20:00</span><span class="time-desc">捷里别尔卡方向追光（包车）</span></div>
-                        <div class="time-item"><span class="time-stamp">次日01:00</span><span class="time-desc">返回酒店休息</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">08:30</span><span class="time-desc">早餐</span></div>
+                            <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">列宁号核动力破冰船（需预约场次）</span></div>
+                            <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">萨米民族村 · 驯鹿拉雪橇（车程约1h）</span></div>
+                            <div class="time-item"><span class="time-stamp">17:00</span><span class="time-desc">返回市区，晚餐</span></div>
+                            <div class="time-item"><span class="time-stamp">20:00</span><span class="time-desc">捷里别尔卡方向追光（包车）</span></div>
+                            <div class="time-item"><span class="time-stamp">次日01:00</span><span class="time-desc">返回酒店休息</span></div>
+                        </div>
+                        <div class="day-map" id="map-day3"></div>
+                        <div class="day-weather" data-city="murmansk" data-date="10-03">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.icebreaker-lenin.ru" target="_blank">列宁号核动力破冰船官网（场次预约）</a>
+                            <a href="https://www.samivillage.ru" target="_blank">萨米民族村官网（体验项目预约）</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> 10月初极光可见概率有但不保证，建议下载Aurora Forecast查看KP指数。夜间包车追光最稳妥，务必穿羽绒服。</div>
                     </div>
-                    <div class="day-map" id="map-day3"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.icebreaker-lenin.ru" target="_blank">列宁号核动力破冰船官网（场次预约）</a>
-                        <a href="https://www.samivillage.ru" target="_blank">萨米民族村官网（体验项目预约）</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> 10月初极光可见概率有但不保证，建议下载Aurora Forecast查看KP指数。夜间包车追光最稳妥，务必穿羽绒服。</div>
                 </div>
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 4</span>
-                        <span class="day-date">10/4 周日</span>
+                <div class="day-card" data-day="4" data-date="2026-10-04">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 4</span>
+                            <span class="day-date">10/4 周日</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">摩尔曼斯克 → 圣彼得堡</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">摩尔曼斯克 → 圣彼得堡 <span>阿廖沙</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">09:00</span><span class="time-desc">早餐，退房寄存行李</span></div>
-                        <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">阿廖沙纪念碑，俯瞰科拉湾</span></div>
-                        <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">午餐</span></div>
-                        <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">市区闲逛，取行李</span></div>
-                        <div class="time-item"><span class="time-stamp">14:30</span><span class="time-desc">前往摩尔曼斯克机场</span></div>
-                        <div class="time-item"><span class="time-stamp">19:15</span><span class="time-desc">SU6346 飞往圣彼得堡</span></div>
-                        <div class="time-item"><span class="time-stamp">21:15</span><span class="time-desc">抵达圣彼得堡，入住涅瓦大街酒店</span></div>
-                        <div class="time-item"><span class="time-stamp">22:00</span><span class="time-desc">附近散步 / 休息</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">09:00</span><span class="time-desc">早餐，退房寄存行李</span></div>
+                            <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">阿廖沙纪念碑，俯瞰科拉湾</span></div>
+                            <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">市区闲逛，取行李</span></div>
+                            <div class="time-item"><span class="time-stamp">14:30</span><span class="time-desc">前往摩尔曼斯克机场</span></div>
+                            <div class="time-item"><span class="time-stamp">19:15</span><span class="time-desc">SU6346 飞往圣彼得堡</span></div>
+                            <div class="time-item"><span class="time-stamp">21:15</span><span class="time-desc">抵达圣彼得堡，入住丽笙皇家酒店</span></div>
+                            <div class="time-item"><span class="time-stamp">22:00</span><span class="time-desc">附近散步 / 休息</span></div>
+                        </div>
+                        <div class="day-map" id="map-day4"></div>
+                        <div class="day-weather" data-city="murmansk" data-date="10-04">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.aeroflot.ru" target="_blank">俄罗斯航空 Aeroflot 官网（SU6346）</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> 圣彼得堡地铁使用“车前草”卡或银联卡。景点集中在涅瓦大街，建议住在市中心。</div>
                     </div>
-                    <div class="day-map" id="map-day4"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.aeroflot.ru" target="_blank">俄罗斯航空 Aeroflot 官网（SU6346）</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> 圣彼得堡地铁使用“车前草”卡或银联卡。景点集中在涅瓦大街，建议住在市中心。</div>
                 </div>
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 5</span>
-                        <span class="day-date">10/5 周一</span>
+                <div class="day-card" data-day="5" data-date="2026-10-05">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 5</span>
+                            <span class="day-date">10/5 周一</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">圣彼得堡</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">圣彼得堡 <span>冬宫闭馆·市区游</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">08:30</span><span class="time-desc">早餐</span></div>
-                        <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">滴血救世主教堂（内部参观）</span></div>
-                        <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">午餐</span></div>
-                        <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">喀山大教堂 · 涅瓦大街</span></div>
-                        <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">俄罗斯博物馆（可选）</span></div>
-                        <div class="time-item"><span class="time-stamp">17:00</span><span class="time-desc">涅瓦大街散步 · 晚餐</span></div>
-                        <div class="time-item"><span class="time-stamp">19:00</span><span class="time-desc">可选涅瓦河游船</span></div>
-                        <div class="time-item"><span class="time-stamp">21:00</span><span class="time-desc">返回酒店</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">08:30</span><span class="time-desc">早餐</span></div>
+                            <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">滴血救世主教堂（内部参观）</span></div>
+                            <div class="time-item"><span class="time-stamp">12:00</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:00</span><span class="time-desc">喀山大教堂 · 涅瓦大街</span></div>
+                            <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">俄罗斯博物馆（可选）</span></div>
+                            <div class="time-item"><span class="time-stamp">17:00</span><span class="time-desc">涅瓦大街散步 · 晚餐</span></div>
+                            <div class="time-item"><span class="time-stamp">19:00</span><span class="time-desc">可选涅瓦河游船</span></div>
+                            <div class="time-item"><span class="time-stamp">21:00</span><span class="time-desc">返回酒店</span></div>
+                        </div>
+                        <div class="day-map" id="map-day5"></div>
+                        <div class="day-weather" data-city="spb" data-date="10-05">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.spas-na-krovi.ru" target="_blank">滴血救世主教堂官网</a>
+                            <a href="https://www.kazancathedral.ru" target="_blank">喀山大教堂官网</a>
+                            <a href="https://www.rusmuseum.ru" target="_blank">俄罗斯博物馆官网</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> 周一冬宫、夏宫均闭馆，调整为市区景点。10月初圣彼得堡10-17°C，随身带伞。</div>
                     </div>
-                    <div class="day-map" id="map-day5"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.spas-na-krovi.ru" target="_blank">滴血救世主教堂官网</a>
-                        <a href="https://www.kazancathedral.ru" target="_blank">喀山大教堂官网</a>
-                        <a href="https://www.rusmuseum.ru" target="_blank">俄罗斯博物馆官网</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> 周一冬宫、夏宫均闭馆，调整为市区景点。10月初圣彼得堡10-17°C，随身带伞。</div>
                 </div>
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 6</span>
-                        <span class="day-date">10/6 周二</span>
+                <div class="day-card" data-day="6" data-date="2026-10-06">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 6</span>
+                            <span class="day-date">10/6 周二</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">圣彼得堡 → 莫斯科</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">圣彼得堡 → 莫斯科 <span>冬宫·高铁</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">07:30</span><span class="time-desc">早餐，退房寄存行李</span></div>
-                        <div class="time-item"><span class="time-stamp">09:00</span><span class="time-desc">冬宫（艾尔米塔什博物馆，周二开放）</span></div>
-                        <div class="time-item"><span class="time-stamp">12:30</span><span class="time-desc">午餐</span></div>
-                        <div class="time-item"><span class="time-stamp">13:30</span><span class="time-desc">取行李，前往莫斯科火车站</span></div>
-                        <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">高铁返回莫斯科（约4小时）</span></div>
-                        <div class="time-item"><span class="time-stamp">19:00</span><span class="time-desc">抵达列宁格勒站，入住酒店</span></div>
-                        <div class="time-item"><span class="time-stamp">20:00</span><span class="time-desc">晚餐，休息</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">07:30</span><span class="time-desc">早餐，退房寄存行李</span></div>
+                            <div class="time-item"><span class="time-stamp">09:00</span><span class="time-desc">冬宫（艾尔米塔什博物馆，周二开放）</span></div>
+                            <div class="time-item"><span class="time-stamp">12:30</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:30</span><span class="time-desc">取行李，前往莫斯科火车站</span></div>
+                            <div class="time-item"><span class="time-stamp">16:17</span><span class="time-desc">Sapsan 775A 高铁返回莫斯科</span></div>
+                            <div class="time-item"><span class="time-stamp">20:27</span><span class="time-desc">抵达列宁格勒站，入住机场智选假日酒店</span></div>
+                            <div class="time-item"><span class="time-stamp">21:00</span><span class="time-desc">晚餐，休息</span></div>
+                        </div>
+                        <div class="day-map" id="map-day6"></div>
+                        <div class="day-weather" data-city="spb" data-date="10-06">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.hermitagemuseum.org" target="_blank">冬宫（艾尔米塔什）官网购票</a>
+                            <a href="https://pass.rzd.ru" target="_blank">俄铁英文购票页面</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> 冬宫周二开放，周一闭馆。高铁票提前在俄铁官网购买，车程约 4 小时 10 分钟。</div>
                     </div>
-                    <div class="day-map" id="map-day6"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.hermitagemuseum.org" target="_blank">冬宫（艾尔米塔什）官网购票</a>
-                        <a href="https://www.rzd.ru" target="_blank">俄铁官网 RZD（高铁购票）</a>
-                        <a href="https://pass.rzd.ru" target="_blank">俄铁英文购票页面</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> 冬宫周二开放，周一闭馆。高铁票提前在俄铁官网购买，约3.5-4小时。</div>
                 </div>
 
-                <div class="day-card">
-                    <div class="day-header">
-                        <span class="day-badge">Day 7</span>
-                        <span class="day-date">10/7 周三</span>
+                <div class="day-card" data-day="7" data-date="2026-10-07">
+                    <div class="day-header" onclick="toggleDayCard(this)">
+                        <div class="day-header-left">
+                            <span class="day-badge">Day 7</span>
+                            <span class="day-date">10/7 周三</span>
+                        </div>
+                        <div class="day-header-right">
+                            <span class="day-city">莫斯科 → 广州</span>
+                            <span class="day-arrow">▼</span>
+                        </div>
                     </div>
-                    <div class="day-route">莫斯科 → 广州 <span>地铁巡游·返程</span></div>
-                    <div class="timeline-items">
-                        <div class="time-item"><span class="time-stamp">08:30</span><span class="time-desc">早餐，退房寄存行李</span></div>
-                        <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">马雅可夫斯基站 · 共青团站（地铁巡游）</span></div>
-                        <div class="time-item"><span class="time-stamp">11:30</span><span class="time-desc">阿尔巴特大街</span></div>
-                        <div class="time-item"><span class="time-stamp">12:30</span><span class="time-desc">午餐</span></div>
-                        <div class="time-item"><span class="time-stamp">13:30</span><span class="time-desc">返回酒店取行李</span></div>
-                        <div class="time-item"><span class="time-stamp">14:00</span><span class="time-desc">机场快线至 SVO</span></div>
-                        <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">机场候机、免税店</span></div>
-                        <div class="time-item"><span class="time-stamp">21:15</span><span class="time-desc">CZ656 返程广州（次日11:40抵达）</span></div>
+                    <div class="day-body">
+                        <div class="timeline-items">
+                            <div class="time-item"><span class="time-stamp">08:30</span><span class="time-desc">早餐，退房寄存行李</span></div>
+                            <div class="time-item"><span class="time-stamp">10:00</span><span class="time-desc">马雅可夫斯基站 · 共青团站（地铁巡游）</span></div>
+                            <div class="time-item"><span class="time-stamp">11:30</span><span class="time-desc">阿尔巴特大街</span></div>
+                            <div class="time-item"><span class="time-stamp">12:30</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:30</span><span class="time-desc">返回酒店取行李</span></div>
+                            <div class="time-item"><span class="time-stamp">14:00</span><span class="time-desc">前往 SVO 机场</span></div>
+                            <div class="time-item"><span class="time-stamp">15:00</span><span class="time-desc">机场候机、免税店</span></div>
+                            <div class="time-item"><span class="time-stamp">21:15</span><span class="time-desc">CZ656 返程广州（次日11:40抵达）</span></div>
+                        </div>
+                        <div class="day-map" id="map-day7"></div>
+                        <div class="day-weather" data-city="moscow" data-date="10-07">
+                            <div class="weather-loading"><span class="spinner"></span> 加载中</div>
+                        </div>
+                        <div class="booking-links">
+                            <div class="label">🔖 预约 / 购票</div>
+                            <a href="https://www.aeroexpress.ru" target="_blank">机场快线 Aeroexpress 官网</a>
+                            <a href="https://www.csair.com" target="_blank">中国南方航空官网（CZ656）</a>
+                        </div>
+                        <div class="day-tip"><span class="emoji">💡</span> SVO建议提前3小时到达。机场快线从白俄罗斯站出发约50分钟。卢布可在机场兑换回。</div>
                     </div>
-                    <div class="day-map" id="map-day7"></div>
-                    <div class="booking-links">
-                        <div class="label">🔖 预约 / 购票</div>
-                        <a href="https://www.aeroexpress.ru" target="_blank">机场快线 Aeroexpress 官网</a>
-                        <a href="https://www.csair.com" target="_blank">中国南方航空官网（CZ656）</a>
-                    </div>
-                    <div class="day-tip"><span class="emoji">💡</span> SVO建议提前3小时到达。机场快线从白俄罗斯站出发约50分钟。卢布可在机场兑换回。</div>
                 </div>
 
             </div>
         </div>
 
-        <!-- ==================== Tab 3: 准备 ==================== -->
+        <!-- ==================== Tab 4: 准备 ==================== -->
         <div class="tab-content" id="tab-prepare">
             <div class="section-title" style="margin-bottom: 14px;">🎒 出行准备</div>
 
@@ -1642,13 +2127,9 @@
                 </div>
                 <div class="accordion-body">
                     <div class="accordion-inner">
-                        <a class="prep-link" href="https://www.rzd.ru" target="_blank">
-                            <span class="emoji">🚄</span>
-                            <span class="text">俄铁官网 RZD（高铁购票）<small>圣彼得堡 → 莫斯科 · Day 6</small></span>
-                        </a>
                         <a class="prep-link" href="https://pass.rzd.ru" target="_blank">
                             <span class="emoji">🚄</span>
-                            <span class="text">俄铁英文购票页面<small>推荐使用，界面更友好</small></span>
+                            <span class="text">俄铁英文购票页面<small>圣彼得堡 → 莫斯科 · Day 6</small></span>
                         </a>
                         <a class="prep-link" href="https://www.aeroflot.ru" target="_blank">
                             <span class="emoji">✈️</span>
@@ -1675,7 +2156,7 @@
             </div>
         </div>
 
-        <!-- ==================== Tab 4: 记账 ==================== -->
+        <!-- ==================== Tab 5: 记账 ==================== -->
         <div class="tab-content" id="tab-ledger">
             <div class="section-title" style="margin-bottom: 14px;">💰 旅行记账</div>
 
@@ -1700,10 +2181,7 @@
 
                 <div class="ledger-form-row">
                     <label>记账人员</label>
-                    <div class="person-toggle" id="personToggle">
-                        <button class="person-btn active" data-person="夹夹">夹夹</button>
-                        <button class="person-btn" data-person="纯纯">纯纯</button>
-                    </div>
+                    <div class="person-toggle" id="personToggle"></div>
                 </div>
 
                 <div class="ledger-form-row">
@@ -1721,13 +2199,18 @@
                 </div>
 
                 <div class="ledger-form-row">
+                    <label>备注（可选）</label>
+                    <input type="text" id="ledgerNote" placeholder="如：午餐、门票、打车" maxlength="20">
+                </div>
+
+                <div class="ledger-form-row">
                     <label>人均分摊</label>
                     <div class="split-display" id="splitDisplay">
-                        人均 <span class="amount">¥0.00</span>（自动按 2 人均摊）
+                        人均 <span class="amount">¥0.00</span>
                     </div>
                 </div>
 
-                <button class="ledger-add-btn" id="ledgerAddBtn">添加记录</button>
+                <button class="ledger-add-btn" id="ledgerAddBtn" type="button">添加记录</button>
                 <div class="ledger-error" id="ledgerError"></div>
             </div>
 
@@ -1745,25 +2228,169 @@
     </main>
 
     <nav class="bottom-nav" id="bottomNav">
-        <button class="nav-btn active" data-tab="overview">
+        <button class="nav-btn active" data-tab="overview" type="button">
             <span class="nav-icon">🗺️</span>
             <span class="nav-label">概览</span>
         </button>
-        <button class="nav-btn" data-tab="itinerary">
+        <button class="nav-btn" data-tab="transport" type="button">
+            <span class="nav-icon">🚆</span>
+            <span class="nav-label">交通</span>
+        </button>
+        <button class="nav-btn" data-tab="itinerary" type="button">
             <span class="nav-icon">📅</span>
             <span class="nav-label">行程</span>
         </button>
-        <button class="nav-btn" data-tab="prepare">
+        <button class="nav-btn" data-tab="prepare" type="button">
             <span class="nav-icon">🎒</span>
             <span class="nav-label">准备</span>
         </button>
-        <button class="nav-btn" data-tab="ledger">
+        <button class="nav-btn" data-tab="ledger" type="button">
             <span class="nav-icon">💰</span>
             <span class="nav-label">记账</span>
         </button>
     </nav>
 
+    <div class="modal-overlay" id="travelerModal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-title" id="travelerModalTitle">添加出行人员</div>
+            <input type="text" id="travelerModalInput" class="modal-input" placeholder="输入名字" maxlength="10">
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="travelerModalCancel" type="button">取消</button>
+                <button class="modal-btn confirm" id="travelerModalConfirm" type="button">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-title" id="confirmTitle">确认操作</div>
+            <div class="modal-message" id="confirmMessage"></div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="confirmCancel" type="button">取消</button>
+                <button class="modal-btn danger" id="confirmOk" type="button">确认</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
+        }
+
+        // ============ 每日行程折叠 ============
+        window.toggleDayCard = function(headerEl) {
+            var card = headerEl.closest('.day-card');
+            if (!card) return;
+            card.classList.toggle('collapsed');
+            if (!card.classList.contains('collapsed')) {
+                setTimeout(function() {
+                    card.querySelectorAll('.day-map').forEach(function(el) {
+                        if (el._leaflet_map && typeof el._leaflet_map.invalidateSize === 'function') {
+                            el._leaflet_map.invalidateSize();
+                        }
+                    });
+                }, 80);
+            }
+        };
+
+        (function() {
+            var now = new Date();
+            var year = now.getFullYear();
+            if (now > new Date(year, 9, 7, 23, 59, 59)) year += 1;
+            var today = new Date(year, now.getMonth(), now.getDate());
+
+            document.querySelectorAll('.day-card[data-date]').forEach(function(card) {
+                var parts = card.dataset.date.split('-');
+                var dayDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                if (today > dayDate) {
+                    card.classList.add('collapsed');
+                }
+            });
+        })();
+
+        // ============ 交通卡片折叠 ============
+        window.toggleTransportCard = function(headerEl) {
+            var card = headerEl.closest('.transport-card');
+            if (!card) return;
+            card.classList.toggle('collapsed');
+        };
+
+        (function() {
+            var now = new Date();
+            var currentYear = now.getFullYear();
+
+            document.querySelectorAll('.transport-card[data-arrive]').forEach(function(card) {
+                var arriveStr = card.dataset.arrive;
+                var adjustedStr = arriveStr.replace(/^\d{4}/, currentYear);
+                var arriveDate = new Date(adjustedStr);
+                if (now > arriveDate) {
+                    card.classList.add('collapsed');
+                }
+            });
+        })();
+
+        // ============ 酒店卡片折叠 ============
+        window.toggleHotelCard = function(headerEl) {
+            var card = headerEl.closest('.hotel-card');
+            if (!card) return;
+            card.classList.toggle('collapsed');
+        };
+
+        (function() {
+            var now = new Date();
+            var currentYear = now.getFullYear();
+
+            document.querySelectorAll('.hotel-card[data-checkout]').forEach(function(card) {
+                var checkoutStr = card.dataset.checkout;
+                var adjustedStr = checkoutStr.replace(/^\d{4}/, currentYear);
+                var checkoutDate = new Date(adjustedStr);
+                if (now > checkoutDate) {
+                    card.classList.add('collapsed');
+                }
+            });
+        })();
+
+        // ============ 交通卡片倒计时 ============
+        (function() {
+            function updateTransportCountdowns() {
+                var now = new Date();
+                var currentYear = now.getFullYear();
+
+                document.querySelectorAll('.transport-countdown').forEach(function(el) {
+                    var departStr = el.dataset.depart;
+                    if (!departStr) return;
+                    var adjustedStr = departStr.replace(/^\d{4}/, currentYear);
+                    var departDate = new Date(adjustedStr);
+                    var diff = departDate.getTime() - now.getTime();
+                    var daysEl = el.querySelector('.cd-days');
+                    var labelEl = el.querySelector('.cd-label');
+                    var unitEl = el.querySelector('.cd-unit');
+                    var iconEl = el.querySelector('.cd-icon');
+
+                    if (diff <= 0) {
+                        // 已出发
+                        el.classList.add('started');
+                        if (iconEl) iconEl.textContent = '✅';
+                        if (labelEl) labelEl.textContent = '已出发';
+                        if (daysEl) daysEl.textContent = '';
+                        if (unitEl) unitEl.textContent = '';
+                    } else {
+                        el.classList.remove('started');
+                        if (iconEl) iconEl.textContent = '⏳';
+                        if (labelEl) labelEl.textContent = '距出发';
+                        var days = Math.ceil(diff / 86400000);
+                        if (daysEl) daysEl.textContent = days;
+                        if (unitEl) unitEl.textContent = '天';
+                    }
+                });
+            }
+
+            updateTransportCountdowns();
+            setInterval(updateTransportCountdowns, 60000);
+        })();
+
         // ============ 密码验证 ============
         (function() {
             var PASSWORD = '202610';
@@ -1806,63 +2433,240 @@
             setTimeout(function() { input.focus(); }, 300);
         })();
 
-        // ============ 倒计时 ============
+        // ============ 通用确认弹窗 ============
         (function() {
-            const now = new Date();
-            let year = now.getFullYear();
-            const departDate = new Date(year, 9, 1, 8, 55, 0);
-            const returnDate = new Date(year, 9, 7, 21, 15, 0);
-            if (now > returnDate) {
-                year += 1;
-                departDate.setFullYear(year);
-                returnDate.setFullYear(year);
+            var confirmCallback = null;
+            window.showConfirm = function(message, onOk, okText) {
+                document.getElementById('confirmMessage').textContent = message;
+                document.getElementById('confirmOk').textContent = okText || '确认';
+                document.getElementById('confirmModal').style.display = 'flex';
+                confirmCallback = onOk;
+            };
+            function closeConfirm() {
+                document.getElementById('confirmModal').style.display = 'none';
+                confirmCallback = null;
             }
-
-            function updateCountdown() {
-                const nowTime = Date.now();
-                const departDiff = departDate.getTime() - nowTime;
-                const returnDiff = returnDate.getTime() - nowTime;
-                const headerSpan = document.getElementById('headerCountdownText');
-                const departEl = document.getElementById('departDays');
-                const returnEl = document.getElementById('returnDays');
-
-                if (departDiff <= 0) {
-                    if (departEl) departEl.textContent = '0';
-                    if (headerSpan) headerSpan.textContent = '已出发';
-                } else {
-                    const days = Math.ceil(departDiff / 86400000);
-                    if (departEl) departEl.textContent = days;
-                    if (headerSpan) headerSpan.textContent = '距出发 ' + days + ' 天';
-                }
-                if (returnDiff <= 0) {
-                    if (returnEl) returnEl.textContent = '0';
-                } else {
-                    if (returnEl) returnEl.textContent = Math.ceil(returnDiff / 86400000);
-                }
-            }
-
-            updateCountdown();
-            setInterval(updateCountdown, 60000);
+            document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+            document.getElementById('confirmOk').addEventListener('click', function() {
+                var cb = confirmCallback;
+                closeConfirm();
+                if (cb) cb();
+            });
+            document.getElementById('confirmModal').addEventListener('click', function(e) {
+                if (e.target === this) closeConfirm();
+            });
         })();
+
+        // ============ 双时钟 ============
+        (function() {
+            var beijingEl = document.getElementById('clockBeijing');
+            var moscowEl = document.getElementById('clockMoscow');
+            var dateBeijingEl = document.getElementById('dateBeijing');
+            var dateMoscowEl = document.getElementById('dateMoscow');
+
+            function updateClocks() {
+                var now = new Date();
+                var pad = function(n) { return String(n).padStart(2, '0'); };
+                var weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+                var bjOffset = 8 * 60;
+                var bjTime = new Date(now.getTime() + (bjOffset + now.getTimezoneOffset()) * 60000);
+                beijingEl.textContent = pad(bjTime.getHours()) + ':' + pad(bjTime.getMinutes());
+                dateBeijingEl.textContent = (bjTime.getMonth() + 1) + '/' + bjTime.getDate() + ' ' + weekdays[bjTime.getDay()];
+
+                var ruOffset = 3 * 60;
+                var ruTime = new Date(now.getTime() + (ruOffset + now.getTimezoneOffset()) * 60000);
+                moscowEl.textContent = pad(ruTime.getHours()) + ':' + pad(ruTime.getMinutes());
+                dateMoscowEl.textContent = (ruTime.getMonth() + 1) + '/' + ruTime.getDate() + ' ' + weekdays[ruTime.getDay()];
+            }
+
+            updateClocks();
+            setInterval(updateClocks, 30000);
+        })();
+
+        // ============ 出行人员管理 ============
+        var TRAVELERS_KEY = 'russia_trip_travelers';
+        var COLOR_GRADIENTS = {
+            '#667eea': 'linear-gradient(135deg, #667eea, #764ba2)',
+            '#f5576c': 'linear-gradient(135deg, #f093fb, #f5576c)',
+            '#10b981': 'linear-gradient(135deg, #10b981, #059669)',
+            '#f59e0b': 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+            '#8b5cf6': 'linear-gradient(135deg, #a78bfa, #8b5cf6)',
+            '#06b6d4': 'linear-gradient(135deg, #22d3ee, #06b6d4)',
+            '#ef4444': 'linear-gradient(135deg, #f87171, #ef4444)',
+            '#ec4899': 'linear-gradient(135deg, #f472b6, #ec4899)'
+        };
+        var COLOR_KEYS = ['#667eea', '#f5576c', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#ec4899'];
+
+        var travelers = [];
+        try {
+            var savedTravelers = JSON.parse(localStorage.getItem(TRAVELERS_KEY) || 'null');
+            if (Array.isArray(savedTravelers)) travelers = savedTravelers;
+        } catch (e) {}
+        if (!travelers.length) {
+            travelers = [
+                { id: 't1', name: '夹夹', color: '#667eea' },
+                { id: 't2', name: '纯纯', color: '#f5576c' }
+            ];
+        }
+
+        function saveTravelers() {
+            try { localStorage.setItem(TRAVELERS_KEY, JSON.stringify(travelers)); } catch (e) {}
+        }
+
+        function getTravelerColor(name) {
+            var t = travelers.find(function(x) { return x.name === name; });
+            return t ? t.color : '#94a3b8';
+        }
+
+        function getTravelerGradient(color) {
+            return COLOR_GRADIENTS[color] || color;
+        }
+
+        function getNextColor() {
+            var used = travelers.map(function(t) { return t.color; });
+            for (var i = 0; i < COLOR_KEYS.length; i++) {
+                if (used.indexOf(COLOR_KEYS[i]) === -1) return COLOR_KEYS[i];
+            }
+            return COLOR_KEYS[travelers.length % COLOR_KEYS.length];
+        }
+
+        function genId() {
+            return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function renderTravelers() {
+            var listEl = document.getElementById('travelersList');
+            if (!listEl) return;
+            if (!travelers.length) {
+                listEl.innerHTML = '<div class="travelers-empty">还没有出行人员，点击右上角「+ 添加」</div>';
+                return;
+            }
+            listEl.innerHTML = travelers.map(function(t) {
+                var initial = t.name ? t.name.charAt(0) : '?';
+                var grad = getTravelerGradient(t.color);
+                return '<div class="traveler-item" data-id="' + t.id + '">' +
+                    '<div class="traveler-avatar-wrapper">' +
+                        '<div class="traveler-avatar" style="background:' + grad + '" data-action="edit" data-id="' + t.id + '">' + escapeHtml(initial) + '</div>' +
+                        '<button class="traveler-delete-btn" type="button" data-action="delete" data-id="' + t.id + '" aria-label="删除">×</button>' +
+                    '</div>' +
+                    '<div class="traveler-name" data-action="edit" data-id="' + t.id + '">' + escapeHtml(t.name) + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        (function() {
+            var listEl = document.getElementById('travelersList');
+            if (!listEl) return;
+            listEl.addEventListener('click', function(e) {
+                var target = e.target.closest('[data-action]');
+                if (!target) return;
+                e.preventDefault();
+                e.stopPropagation();
+                var action = target.dataset.action;
+                var id = target.dataset.id;
+                if (!id) return;
+                if (action === 'delete') deleteTraveler(id);
+                else if (action === 'edit') openTravelerModal(id);
+            });
+        })();
+
+        var currentEditId = null;
+
+        function openTravelerModal(id) {
+            currentEditId = id || null;
+            var modal = document.getElementById('travelerModal');
+            var title = document.getElementById('travelerModalTitle');
+            var input = document.getElementById('travelerModalInput');
+            if (id) {
+                var t = travelers.find(function(x) { return x.id === id; });
+                title.textContent = '编辑出行人员';
+                input.value = t ? t.name : '';
+            } else {
+                title.textContent = '添加出行人员';
+                input.value = '';
+            }
+            modal.style.display = 'flex';
+            setTimeout(function() { input.focus(); input.select(); }, 100);
+        }
+
+        function closeTravelerModal() {
+            document.getElementById('travelerModal').style.display = 'none';
+            currentEditId = null;
+        }
+
+        function saveTravelerFromModal() {
+            var input = document.getElementById('travelerModalInput');
+            var name = (input.value || '').trim();
+            if (!name) { input.focus(); return; }
+            if (currentEditId) {
+                var oldName = null;
+                travelers.forEach(function(t) {
+                    if (t.id === currentEditId) { oldName = t.name; t.name = name; }
+                });
+                if (oldName && oldName !== name) updateLedgerPersonName(oldName, name);
+            } else {
+                travelers.push({ id: genId(), name: name, color: getNextColor() });
+            }
+            saveTravelers();
+            renderTravelers();
+            notifyTravelersChanged();
+            closeTravelerModal();
+        }
+
+        function deleteTraveler(id) {
+            var t = travelers.find(function(x) { return x.id === id; });
+            if (!t) return;
+            window.showConfirm('确定删除出行人员「' + t.name + '」吗？', function() {
+                travelers = travelers.filter(function(x) { return x.id !== id; });
+                saveTravelers();
+                renderTravelers();
+                notifyTravelersChanged();
+            }, '删除');
+        }
+
+        function notifyTravelersChanged() {
+            window.dispatchEvent(new CustomEvent('travelersChanged'));
+        }
+
+        function updateLedgerPersonName(oldName, newName) {
+            try {
+                var records = JSON.parse(localStorage.getItem('russia_trip_ledger') || '[]');
+                var changed = false;
+                records.forEach(function(r) {
+                    if (r.person === oldName) { r.person = newName; changed = true; }
+                });
+                if (changed) localStorage.setItem('russia_trip_ledger', JSON.stringify(records));
+            } catch (e) {}
+        }
+
+        document.getElementById('addTravelerBtn').addEventListener('click', function() { openTravelerModal(null); });
+        document.getElementById('travelerModalCancel').addEventListener('click', closeTravelerModal);
+        document.getElementById('travelerModalConfirm').addEventListener('click', saveTravelerFromModal);
+        document.getElementById('travelerModalInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') saveTravelerFromModal();
+        });
+        document.getElementById('travelerModal').addEventListener('click', function(e) {
+            if (e.target === this) closeTravelerModal();
+        });
+
+        renderTravelers();
 
         // ============ 航班滑动交互 ============
         (function() {
             const slider = document.getElementById('flightSlider');
             const tabs = document.querySelectorAll('.flight-tab');
             const dots = document.querySelectorAll('#slideDots .dot');
-
             function setActive(index) {
                 tabs.forEach((t, i) => t.classList.toggle('active', i === index));
                 dots.forEach((d, i) => d.classList.toggle('active', i === index));
             }
-
             tabs.forEach((tab, i) => {
                 tab.addEventListener('click', () => {
                     slider.scrollTo({ left: slider.clientWidth * i, behavior: 'smooth' });
                     setActive(i);
                 });
             });
-
             let ticking = false;
             slider.addEventListener('scroll', () => {
                 if (!ticking) {
@@ -1881,11 +2685,11 @@
             const navBtns = document.querySelectorAll('.nav-btn');
             const tabs = {
                 overview: document.getElementById('tab-overview'),
+                transport: document.getElementById('tab-transport'),
                 itinerary: document.getElementById('tab-itinerary'),
                 prepare: document.getElementById('tab-prepare'),
                 ledger: document.getElementById('tab-ledger')
             };
-
             let dayMapsInited = false;
 
             function switchTab(tabId) {
@@ -1894,7 +2698,6 @@
                     tabs[k].classList.toggle('active', k === tabId);
                 });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-
                 if (tabId === 'itinerary' && !dayMapsInited) {
                     dayMapsInited = true;
                     setTimeout(initDayMaps, 60);
@@ -1906,7 +2709,7 @@
             });
         })();
 
-        // ============ 折叠面板交互 ============
+        // ============ 折叠面板 ============
         (function() {
             document.querySelectorAll('.accordion-header').forEach(function(header) {
                 header.addEventListener('click', function() {
@@ -1914,76 +2717,56 @@
                     acc.classList.toggle('open');
                 });
             });
-
             var pack = document.getElementById('acc-pack');
             if (pack) pack.classList.add('open');
         })();
 
-        // ============ 清单勾选状态持久化 ============
+        // ============ 清单持久化 ============
         (function() {
             var STORAGE_KEY = 'russia_trip_checklist';
             var saved = {};
-            try {
-                saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            } catch (e) { saved = {}; }
-
+            try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { saved = {}; }
             document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
                 var key = cb.dataset.key;
                 if (key && saved[key]) cb.checked = true;
-
                 cb.addEventListener('change', function() {
                     if (key) {
                         saved[key] = cb.checked;
-                        try {
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-                        } catch (e) {}
+                        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch (e) {}
                     }
                 });
             });
         })();
 
-        // ============ 记账功能（多货币版） ============
+        // ============ 记账功能 ============
         (function() {
             var STORAGE_KEY = 'russia_trip_ledger';
             var RATE_CACHE_KEY = 'russia_trip_rates';
             var records = [];
-            var selectedPerson = '夹夹';
-            var currentRate = 1;   // 当前选中货币兑 CNY 的汇率
-
-            // 兜底汇率（API 失败时使用）
+            var selectedPerson = null;
+            var currentRate = 1;
             var FALLBACK_RATES = { CNY: 1, USD: 7.20, RUB: 0.075, EUR: 7.80 };
             var CURRENCY_SYMBOLS = { CNY: '¥', USD: '$', RUB: '₽', EUR: '€' };
 
-            // 加载记录
             try {
                 var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                 if (Array.isArray(saved)) records = saved;
             } catch (e) { records = []; }
 
-            // 兼容旧数据（无 currency 字段）
             records.forEach(function(r) {
                 if (!r.currency) {
-                    r.currency = 'CNY';
-                    r.originalAmount = r.amount;
-                    r.rate = 1;
-                    r.amountCNY = r.amount;
+                    r.currency = 'CNY'; r.originalAmount = r.amount; r.rate = 1; r.amountCNY = r.amount;
                 }
-                if (typeof r.amountCNY !== 'number') {
-                    r.amountCNY = Number(r.originalAmount) * (Number(r.rate) || 1);
-                }
+                if (typeof r.amountCNY !== 'number') r.amountCNY = Number(r.originalAmount) * (Number(r.rate) || 1);
+                if (typeof r.note !== 'string') r.note = '';
             });
 
-            function save() {
+            function saveRecords() {
                 try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch (e) {}
             }
 
-            // ===== 汇率获取 =====
             var rateCache = {};
-            try {
-                rateCache = JSON.parse(localStorage.getItem(RATE_CACHE_KEY) || '{}');
-            } catch (e) { rateCache = {}; }
-
-            // 缓存的汇率有效期（毫秒）：6 小时
+            try { rateCache = JSON.parse(localStorage.getItem(RATE_CACHE_KEY) || '{}'); } catch (e) { rateCache = {}; }
             var RATE_TTL = 6 * 3600 * 1000;
 
             function isCacheValid(entry) {
@@ -1994,72 +2777,81 @@
                 try { localStorage.setItem(RATE_CACHE_KEY, JSON.stringify(rateCache)); } catch (e) {}
             }
 
-            // 从 open.er-api.com 获取汇率（免费，无密钥）
             function fetchRatesFromAPI() {
                 return fetch('https://open.er-api.com/v6/latest/CNY')
-                    .then(function(res) {
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
-                        return res.json();
-                    })
+                    .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
                     .then(function(data) {
                         if (!data || !data.rates) throw new Error('Invalid data');
                         var now = Date.now();
                         ['USD', 'RUB', 'EUR'].forEach(function(c) {
-                            if (data.rates[c]) {
-                                rateCache[c] = {
-                                    rate: 1 / data.rates[c],
-                                    timestamp: now
-                                };
-                            }
+                            if (data.rates[c]) rateCache[c] = { rate: 1 / data.rates[c], timestamp: now };
                         });
                         rateCache.CNY = { rate: 1, timestamp: now };
                         saveRateCache();
                     });
             }
 
-            // 获取某货币兑 CNY 的汇率
             function getRate(currency) {
                 if (currency === 'CNY') return Promise.resolve(1);
                 var cached = rateCache[currency];
                 if (isCacheValid(cached)) return Promise.resolve(cached.rate);
-                // 缓存过期，重新获取
                 return fetchRatesFromAPI()
                     .then(function() {
                         var fresh = rateCache[currency];
                         if (isCacheValid(fresh)) return fresh.rate;
                         return FALLBACK_RATES[currency] || 1;
                     })
-                    .catch(function(err) {
-                        console.warn('汇率获取失败，使用兜底汇率', err);
-                        return FALLBACK_RATES[currency] || 1;
-                    });
+                    .catch(function() { return FALLBACK_RATES[currency] || 1; });
             }
 
-            // ===== 表单元素 =====
             var amountInput = document.getElementById('ledgerAmount');
             var currencySelect = document.getElementById('ledgerCurrency');
             var convertDisplay = document.getElementById('currencyConvert');
             var splitDisplay = document.getElementById('splitDisplay');
+            var noteInput = document.getElementById('ledgerNote');
+            var personToggleEl = document.getElementById('personToggle');
 
-            // 更新换算显示
+            function renderPersonToggle() {
+                if (!personToggleEl) return;
+                if (!travelers.length) {
+                    personToggleEl.innerHTML = '<div class="no-travelers-hint">请先在「概览」中添加出行人员</div>';
+                    selectedPerson = null;
+                    return;
+                }
+                if (!selectedPerson || !travelers.some(function(t) { return t.name === selectedPerson; })) {
+                    selectedPerson = travelers[0].name;
+                }
+                personToggleEl.innerHTML = travelers.map(function(t) {
+                    var active = t.name === selectedPerson ? ' active' : '';
+                    var style = active ? 'background:' + getTravelerGradient(t.color) + ';border-color:' + t.color + ';' : '';
+                    return '<button class="person-btn' + active + '" type="button" data-person="' + escapeHtml(t.name) + '" style="' + style + '">' + escapeHtml(t.name) + '</button>';
+                }).join('');
+                personToggleEl.querySelectorAll('.person-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        selectedPerson = btn.dataset.person;
+                        renderPersonToggle();
+                    });
+                });
+            }
+
+            function updateSplit() {
+                var amount = parseFloat(amountInput.value) || 0;
+                var cnyTotal = amount * currentRate;
+                var n = travelers.length || 1;
+                splitDisplay.innerHTML = '人均 <span class="amount">¥' + (cnyTotal / n).toFixed(2) + '</span>（自动按 ' + n + ' 人均摊）';
+            }
+
             function refreshConversion() {
                 var currency = currencySelect.value;
                 var amount = parseFloat(amountInput.value) || 0;
-
                 if (currency === 'CNY') {
-                    currentRate = 1;
-                    convertDisplay.textContent = '';
-                    updateSplit();
-                    return;
+                    currentRate = 1; convertDisplay.textContent = ''; updateSplit(); return;
                 }
-
-                // 异步获取汇率
                 convertDisplay.textContent = '正在获取汇率…';
                 getRate(currency).then(function(rate) {
                     currentRate = rate;
                     if (amount > 0) {
-                        convertDisplay.textContent = '≈ ¥' + (amount * rate).toFixed(2) +
-                            '（1 ' + currency + ' ≈ ¥' + rate.toFixed(4) + '）';
+                        convertDisplay.textContent = '≈ ¥' + (amount * rate).toFixed(2) + '（1 ' + currency + ' ≈ ¥' + rate.toFixed(4) + '）';
                     } else {
                         convertDisplay.textContent = '1 ' + currency + ' ≈ ¥' + rate.toFixed(4);
                     }
@@ -2067,92 +2859,53 @@
                 });
             }
 
-            // 更新人均显示
-            function updateSplit() {
-                var amount = parseFloat(amountInput.value) || 0;
-                var cnyTotal = amount * currentRate;
-                splitDisplay.innerHTML = '人均 <span class="amount">¥' + (cnyTotal / 2).toFixed(2) + '</span>（自动按 2 人均摊）';
-            }
-
-            // ===== 事件绑定 =====
             amountInput.addEventListener('input', function() {
-                // 金额变化时不重新请求汇率，直接用 currentRate 计算
                 var currency = currencySelect.value;
                 var amount = parseFloat(amountInput.value) || 0;
                 if (currency === 'CNY') {
-                    currentRate = 1;
-                    convertDisplay.textContent = '';
+                    currentRate = 1; convertDisplay.textContent = '';
                 } else if (currentRate && currentRate !== 1) {
-                    convertDisplay.textContent = '≈ ¥' + (amount * currentRate).toFixed(2) +
-                        '（1 ' + currency + ' ≈ ¥' + currentRate.toFixed(4) + '）';
+                    convertDisplay.textContent = '≈ ¥' + (amount * currentRate).toFixed(2) + '（1 ' + currency + ' ≈ ¥' + currentRate.toFixed(4) + '）';
                 }
                 updateSplit();
             });
 
-            currencySelect.addEventListener('change', function() {
-                currentRate = 1;
-                refreshConversion();
-            });
+            currencySelect.addEventListener('change', function() { currentRate = 1; refreshConversion(); });
 
-            // 人员切换
-            document.querySelectorAll('.person-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    selectedPerson = btn.dataset.person;
-                    document.querySelectorAll('.person-btn').forEach(function(b) {
-                        b.classList.toggle('active', b === btn);
-                    });
-                });
-            });
-
-            // 添加记录
             document.getElementById('ledgerAddBtn').addEventListener('click', function() {
                 var datetime = document.getElementById('ledgerDate').value;
                 var amount = parseFloat(amountInput.value);
                 var currency = currencySelect.value;
+                var note = (noteInput.value || '').trim();
                 var errorEl = document.getElementById('ledgerError');
 
+                if (!travelers.length) { errorEl.textContent = '请先在「概览」中添加出行人员'; return; }
                 if (!datetime) { errorEl.textContent = '请选择时间'; return; }
                 if (!amount || amount <= 0) { errorEl.textContent = '请输入有效的金额'; return; }
                 if (currency !== 'CNY' && (!currentRate || currentRate === 1)) {
-                    // 可能还在获取汇率，强制获取一次
                     errorEl.textContent = '正在获取汇率，请稍候…';
                     getRate(currency).then(function(rate) {
-                        currentRate = rate;
-                        errorEl.textContent = '';
-                        // 自动重试
+                        currentRate = rate; errorEl.textContent = '';
                         document.getElementById('ledgerAddBtn').click();
                     });
                     return;
                 }
                 errorEl.textContent = '';
-
                 var cnyAmount = amount * currentRate;
-
                 records.push({
                     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-                    datetime: datetime,
-                    person: selectedPerson,
-                    currency: currency,
-                    originalAmount: amount,
-                    rate: currentRate,
-                    amountCNY: cnyAmount
+                    datetime: datetime, person: selectedPerson, currency: currency,
+                    originalAmount: amount, rate: currentRate, amountCNY: cnyAmount, note: note
                 });
-                save();
-                render();
-
-                // 清空金额，保留时间和人员
-                amountInput.value = '';
-                convertDisplay.textContent = '';
-                currentRate = currency === 'CNY' ? 1 : currentRate;
+                saveRecords(); render();
+                amountInput.value = ''; noteInput.value = ''; convertDisplay.textContent = '';
+                if (currency === 'CNY') currentRate = 1;
                 updateSplit();
             });
 
-            // 回车快捷添加
-            amountInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') document.getElementById('ledgerAddBtn').click();
-            });
+            amountInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ledgerAddBtn').click(); });
+            noteInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') document.getElementById('ledgerAddBtn').click(); });
 
-            // ===== 日期格式化 =====
             function formatDateLabel(dateStr) {
                 var d = new Date(dateStr + 'T00:00:00');
                 var weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -2165,20 +2918,13 @@
                 return (parseInt(dp[1], 10)) + '/' + (parseInt(dp[2], 10)) + ' ' + (parts[1] || '');
             }
 
-            function personColor(p) {
-                return p === '夹夹' ? '#667eea' : '#f5576c';
-            }
-
-            // ===== 渲染 =====
             function render() {
-                // 汇总（按 CNY 金额）
+                var n = travelers.length || 1;
                 var total = records.reduce(function(s, r) { return s + (Number(r.amountCNY) || 0); }, 0);
-                var perPerson = total / 2;
-
+                var perPerson = total / n;
                 document.getElementById('ledgerTotal').textContent = total.toFixed(2);
                 document.getElementById('ledgerPerPerson').textContent = perPerson.toFixed(2);
 
-                // 每日分组
                 var byDay = {};
                 records.forEach(function(r) {
                     var day = r.datetime.split('T')[0];
@@ -2192,12 +2938,9 @@
                     dailyEl.innerHTML = '<div class="ledger-empty">暂无记录</div>';
                 } else {
                     dailyEl.innerHTML = days.map(function(day) {
-                        var dayRecords = byDay[day].slice().sort(function(a, b) {
-                            return a.datetime.localeCompare(b.datetime);
-                        });
+                        var dayRecords = byDay[day].slice().sort(function(a, b) { return a.datetime.localeCompare(b.datetime); });
                         var dayTotal = dayRecords.reduce(function(s, r) { return s + (Number(r.amountCNY) || 0); }, 0);
-                        var dayPer = dayTotal / 2;
-
+                        var dayPer = dayTotal / n;
                         return '<div class="ledger-day-card">' +
                             '<div class="ledger-day-header">' +
                                 '<span class="ledger-day-date">' + formatDateLabel(day) + '</span>' +
@@ -2212,12 +2955,15 @@
                                     if (r.currency === 'CNY') {
                                         amtHtml = '¥' + Number(r.originalAmount).toFixed(2);
                                     } else {
-                                        amtHtml = sym + Number(r.originalAmount).toFixed(2) +
-                                            '<span class="cny-eq">≈¥' + Number(r.amountCNY).toFixed(2) + '</span>';
+                                        amtHtml = sym + Number(r.originalAmount).toFixed(2) + '<span class="cny-eq">≈¥' + Number(r.amountCNY).toFixed(2) + '</span>';
                                     }
+                                    var noteHtml = r.note ? '<span class="ledger-item-note">' + escapeHtml(r.note) + '</span>' : '';
                                     return '<div class="ledger-item">' +
                                         '<span class="ledger-item-time">' + time + '</span>' +
-                                        '<span class="ledger-item-person" style="color:' + personColor(r.person) + '">' + r.person + '</span>' +
+                                        '<span class="ledger-item-desc">' +
+                                            '<span class="ledger-item-person" style="color:' + getTravelerColor(r.person) + '">' + escapeHtml(r.person) + '</span>' +
+                                            noteHtml +
+                                        '</span>' +
                                         '<span class="ledger-item-amount">' + amtHtml + '</span>' +
                                     '</div>';
                                 }).join('') +
@@ -2226,67 +2972,60 @@
                     }).join('');
                 }
 
-                // 全部记录（按时间倒序）
                 var listEl = document.getElementById('ledgerList');
                 if (!records.length) {
                     listEl.innerHTML = '<div class="ledger-empty">暂无记录</div>';
                 } else {
-                    var sorted = records.slice().sort(function(a, b) {
-                        return b.datetime.localeCompare(a.datetime);
-                    });
+                    var sorted = records.slice().sort(function(a, b) { return b.datetime.localeCompare(a.datetime); });
                     listEl.innerHTML = sorted.map(function(r) {
                         var sym = CURRENCY_SYMBOLS[r.currency] || '¥';
                         var mainAmt, subAmt;
                         if (r.currency === 'CNY') {
                             mainAmt = '¥' + Number(r.originalAmount).toFixed(2);
-                            subAmt = '人均 ¥' + (Number(r.amountCNY) / 2).toFixed(2);
+                            subAmt = '人均 ¥' + (Number(r.amountCNY) / n).toFixed(2);
                         } else {
                             mainAmt = sym + Number(r.originalAmount).toFixed(2);
-                            subAmt = '≈¥' + Number(r.amountCNY).toFixed(2) + ' · 人均 ¥' + (Number(r.amountCNY) / 2).toFixed(2);
+                            subAmt = '≈¥' + Number(r.amountCNY).toFixed(2) + ' · 人均 ¥' + (Number(r.amountCNY) / n).toFixed(2);
                         }
-
+                        var noteHtml = r.note ? '<div class="ledger-record-note">' + escapeHtml(r.note) + '</div>' : '';
                         return '<div class="ledger-record">' +
                             '<div class="ledger-record-main">' +
-                                '<div class="ledger-record-person" style="color:' + personColor(r.person) + '">' + r.person + '</div>' +
+                                '<div class="ledger-record-person" style="color:' + getTravelerColor(r.person) + '">' + escapeHtml(r.person) + '</div>' +
                                 '<div class="ledger-record-time">' + formatDateTime(r.datetime) + '</div>' +
+                                noteHtml +
                             '</div>' +
                             '<div class="ledger-record-right">' +
                                 '<div class="ledger-record-amount">' + mainAmt + '</div>' +
                                 '<div class="ledger-record-share">' + subAmt + '</div>' +
                             '</div>' +
-                            '<button class="ledger-record-delete" data-id="' + r.id + '" aria-label="删除">×</button>' +
+                            '<button class="ledger-record-delete" type="button" data-id="' + r.id + '" aria-label="删除">×</button>' +
                         '</div>';
                     }).join('');
-
-                    // 删除绑定
                     listEl.querySelectorAll('.ledger-record-delete').forEach(function(btn) {
                         btn.addEventListener('click', function() {
                             var id = btn.dataset.id;
-                            if (confirm('确定删除这条记录吗？删除后总费用与每日总结会自动更新。')) {
+                            window.showConfirm('确定删除这条记录吗？删除后总费用与每日总结会自动更新。', function() {
                                 records = records.filter(function(r) { return r.id !== id; });
-                                save();
-                                render();
-                            }
+                                saveRecords(); render();
+                            }, '删除');
                         });
                     });
                 }
             }
 
-            // 默认时间：当下
             function setDefaultDateTime() {
                 var input = document.getElementById('ledgerDate');
                 if (!input) return;
                 var now = new Date();
-                var pad = function(n) { return String(n).padStart(2, '0'); };
-                var val = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
-                          'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
-                input.value = val;
+                var pad = function(x) { return String(x).padStart(2, '0'); };
+                input.value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
             }
 
-            // 初始化
-            setDefaultDateTime();
-            render();
-            // 启动时如果缓存无效，预热汇率
+            window.addEventListener('travelersChanged', function() {
+                renderPersonToggle(); render(); updateSplit();
+            });
+
+            setDefaultDateTime(); renderPersonToggle(); render(); updateSplit();
             if (!isCacheValid(rateCache.USD) || !isCacheValid(rateCache.RUB) || !isCacheValid(rateCache.EUR)) {
                 fetchRatesFromAPI().catch(function() {});
             }
@@ -2295,9 +3034,9 @@
         // ============ 天气预测 ============
         (function() {
             var CITIES = {
-                moscow:   { lat: 55.7558, lng: 37.6173 },
+                moscow: { lat: 55.7558, lng: 37.6173 },
                 murmansk: { lat: 68.9585, lng: 33.0827 },
-                spb:      { lat: 59.9343, lng: 30.3351 }
+                spb: { lat: 59.9343, lng: 30.3351 }
             };
 
             function getWeatherInfo(code) {
@@ -2319,84 +3058,42 @@
                 return { icon: '🌡️', desc: '未知' };
             }
 
-            function formatDate(year, month, day) {
-                return year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-            }
+            function formatDate(y, m, d) { return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); }
 
-            function fetchWeatherForCity(cityKey, cityCoords) {
-                var url = 'https://api.open-meteo.com/v1/forecast'
-                    + '?latitude=' + cityCoords.lat
-                    + '&longitude=' + cityCoords.lng
-                    + '&daily=temperature_2m_max,temperature_2m_min,weather_code'
-                    + '&timezone=Europe/Moscow'
-                    + '&forecast_days=16';
-
-                return fetch(url)
-                    .then(function(res) {
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
-                        return res.json();
-                    })
-                    .then(function(data) { return data.daily || null; });
+            function fetchWeather(cityCoords) {
+                var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + cityCoords.lat + '&longitude=' + cityCoords.lng + '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe/Moscow&forecast_days=16';
+                return fetch(url).then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); }).then(function(d) { return d.daily || null; });
             }
 
             function updateWeatherDisplay(cityKey, dailyData) {
-                var elements = document.querySelectorAll('.overview-day-weather[data-city="' + cityKey + '"]');
+                var elements = document.querySelectorAll('.day-weather[data-city="' + cityKey + '"]');
                 if (!elements.length) return;
-
-                var now = new Date();
-                var currentYear = now.getFullYear();
+                var now = new Date(); var currentYear = now.getFullYear();
                 if (now > new Date(currentYear, 9, 7, 21, 15, 0)) currentYear += 1;
-
                 elements.forEach(function(el) {
-                    var dateStr = el.dataset.date;
-                    var parts = dateStr.split('-');
+                    var dateStr = el.dataset.date; var parts = dateStr.split('-');
                     var targetDate = formatDate(currentYear, parseInt(parts[0], 10), parseInt(parts[1], 10));
-
-                    if (!dailyData || !dailyData.time) {
-                        el.innerHTML = '<span class="weather-unavailable">天气数据暂不可用</span>';
-                        return;
-                    }
-
+                    if (!dailyData || !dailyData.time) { el.innerHTML = '<span class="weather-unavailable">天气数据暂不可用</span>'; return; }
                     var idx = dailyData.time.indexOf(targetDate);
-                    if (idx === -1) {
-                        el.innerHTML = '<span class="weather-unavailable">日期超出预报范围</span>';
-                        return;
-                    }
-
+                    if (idx === -1) { el.innerHTML = '<span class="weather-unavailable">日期超出预报范围</span>'; return; }
                     var maxTemp = Math.round(dailyData.temperature_2m_max[idx]);
                     var minTemp = Math.round(dailyData.temperature_2m_min[idx]);
                     var info = getWeatherInfo(dailyData.weather_code[idx]);
-
-                    el.innerHTML =
-                        '<span class="weather-icon">' + info.icon + '</span>' +
-                        '<div class="weather-info">' +
-                            '<div class="weather-temps">' +
-                                '<span class="high">' + maxTemp + '°</span>' +
-                                '<span class="sep">/</span>' +
-                                '<span class="low">' + minTemp + '°</span>' +
-                            '</div>' +
-                            '<div class="weather-desc">' + info.desc + '</div>' +
-                        '</div>';
+                    el.innerHTML = '<span class="weather-icon">' + info.icon + '</span><div class="weather-info"><div class="weather-temps"><span class="high">' + maxTemp + '°</span><span class="sep">/</span><span class="low">' + minTemp + '°</span></div><div class="weather-desc">' + info.desc + '</div></div>';
                 });
             }
 
             function showWeatherError() {
-                document.querySelectorAll('.overview-day-weather').forEach(function(el) {
-                    el.innerHTML = '<span class="weather-unavailable">天气数据暂不可用</span>';
-                });
+                document.querySelectorAll('.day-weather').forEach(function(el) { el.innerHTML = '<span class="weather-unavailable">天气数据暂不可用</span>'; });
             }
 
             var promises = Object.keys(CITIES).map(function(key) {
-                return fetchWeatherForCity(key, CITIES[key])
-                    .then(function(d) { return { key: key, data: d }; })
-                    .catch(function() { return { key: key, data: null }; });
+                return fetchWeather(CITIES[key]).then(function(d) { return { key: key, data: d }; }).catch(function() { return { key: key, data: null }; });
             });
 
             Promise.all(promises).then(function(results) {
                 var hasAny = false;
-                results.forEach(function(r) {
-                    if (r.data) { hasAny = true; updateWeatherDisplay(r.key, r.data); }
-                });
+                results.forEach(function(r) { if (r.data) { hasAny = true; updateWeatherDisplay(r.key, r.data); } });
                 if (!hasAny) showWeatherError();
             }).catch(showWeatherError);
         })();
@@ -2405,71 +3102,36 @@
         function initAMap() {
             var cityEl = document.getElementById('city-map');
             if (!cityEl) return;
-
             var map = new AMap.Map('city-map', {
-                zoom: 3,
-                center: [70, 45],
-                viewMode: '2D',
-                mapStyle: 'amap://styles/whitesmoke',
-                showLabel: true,
+                zoom: 3, center: [70, 45], viewMode: '2D',
+                mapStyle: 'amap://styles/whitesmoke', showLabel: true,
                 features: ['bg', 'road', 'building', 'point']
             });
-
-            var gz  = [113.2644, 23.1291];
-            var msk = [37.6173, 55.7558];
-            var mmk = [33.0827, 68.9585];
-            var led = [30.3351, 59.9343];
+            var gz = [113.2644, 23.1291], msk = [37.6173, 55.7558], mmk = [33.0827, 68.9585], led = [30.3351, 59.9343];
 
             function drawFlight(from, to, color) {
-                return new AMap.Polyline({
-                    path: [from, to], geodesic: true, strokeColor: color,
-                    strokeWeight: 2.5, strokeStyle: 'dashed', strokeDasharray: [6, 6],
-                    lineJoin: 'round', map: map
-                });
+                return new AMap.Polyline({ path: [from, to], geodesic: true, strokeColor: color, strokeWeight: 2.5, strokeStyle: 'dashed', strokeDasharray: [6, 6], lineJoin: 'round', map: map });
             }
             function drawTrain(from, to) {
-                return new AMap.Polyline({
-                    path: [from, to], geodesic: true, strokeColor: '#f59e0b',
-                    strokeWeight: 3, strokeStyle: 'solid', lineJoin: 'round', map: map
-                });
+                return new AMap.Polyline({ path: [from, to], geodesic: true, strokeColor: '#f59e0b', strokeWeight: 3, strokeStyle: 'solid', lineJoin: 'round', map: map });
             }
 
-            drawFlight(gz, msk, '#3b82f6');
-            drawFlight(msk, mmk, '#3b82f6');
-            drawFlight(mmk, led, '#3b82f6');
-            drawTrain(led, msk);
-            drawFlight(msk, gz, '#8b5cf6');
+            drawFlight(gz, msk, '#3b82f6'); drawFlight(msk, mmk, '#3b82f6'); drawFlight(mmk, led, '#3b82f6');
+            drawTrain(led, msk); drawFlight(msk, gz, '#8b5cf6');
 
             function addCity(pos, name, color) {
-                return new AMap.Marker({
-                    position: pos, map: map, zIndex: 200,
+                return new AMap.Marker({ position: pos, map: map, zIndex: 200,
                     content: '<div style="background:' + color + ';color:white;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.25);border:2px solid white;font-family:inherit;">' + name + '</div>',
-                    offset: new AMap.Pixel(-22, -14)
-                });
+                    offset: new AMap.Pixel(-22, -14) });
             }
-
-            addCity(gz,  '广州',       '#ef4444');
-            addCity(msk, '莫斯科',     '#ef4444');
-            addCity(mmk, '摩尔曼斯克', '#3b82f6');
-            addCity(led, '圣彼得堡',   '#10b981');
+            addCity(gz, '广州', '#ef4444'); addCity(msk, '莫斯科', '#ef4444'); addCity(mmk, '摩尔曼斯克', '#3b82f6'); addCity(led, '圣彼得堡', '#10b981');
 
             function addRouteLabel(pos, text, borderColor, textColor) {
-                return new AMap.Text({
-                    text: text, position: pos, map: map, anchor: 'center', zIndex: 150,
-                    style: {
-                        'background-color': '#ffffff',
-                        'border': '1.5px solid ' + (borderColor || '#bfdbfe'),
-                        'border-radius': '8px', 'padding': '3px 8px',
-                        'color': textColor || '#1e40af', 'font-size': '10px',
-                        'font-weight': '600', 'white-space': 'nowrap',
-                        'box-shadow': '0 2px 6px rgba(0,0,0,0.1)',
-                        'line-height': '1.4', 'font-family': 'inherit'
-                    }
-                });
+                return new AMap.Text({ text: text, position: pos, map: map, anchor: 'center', zIndex: 150,
+                    style: { 'background-color': '#ffffff', 'border': '1.5px solid ' + (borderColor || '#bfdbfe'), 'border-radius': '8px', 'padding': '3px 8px', 'color': textColor || '#1e40af', 'font-size': '10px', 'font-weight': '600', 'white-space': 'nowrap', 'box-shadow': '0 2px 6px rgba(0,0,0,0.1)', 'line-height': '1.4', 'font-family': 'inherit' } });
             }
-
             addRouteLabel([75.44, 43.5], '10/1 ✈️ CZ8027 广州→莫斯科', '#3b82f6', '#1e40af');
-            addRouteLabel([75.44, 35.5], '10/7 ✈️ CZ656 莫斯科→广州',  '#8b5cf6', '#6d28d9');
+            addRouteLabel([75.44, 35.5], '10/7 ✈️ CZ656 莫斯科→广州', '#8b5cf6', '#6d28d9');
             addRouteLabel([38.5, 64.0], '10/2 ✈️ SU1326 莫斯科→摩尔曼斯克', '#3b82f6', '#1e40af');
             addRouteLabel([27.5, 62.5], '10/4 ✈️ SU6346 摩尔曼斯克→圣彼得堡', '#3b82f6', '#1e40af');
             addRouteLabel([31.5, 56.0], '10/6 🚄 高铁 圣彼得堡→莫斯科', '#f59e0b', '#92400e');
@@ -2478,34 +3140,44 @@
             map.setBounds(bounds);
         }
 
-        // ============ 每日地图 ============
+        // ============ 每日地图（Leaflet） ============
         function initDayMaps() {
+            if (typeof L === 'undefined') {
+                console.warn('Leaflet 未加载，每日地图无法显示');
+                return;
+            }
+
             function initDayMap(containerId, points, zoom, center) {
                 var el = document.getElementById(containerId);
                 if (!el) return;
+                if (el._leaflet_id) return;
 
-                var dayMap = new AMap.Map(containerId, {
-                    zoom: zoom || 12,
-                    center: center || points[0],
-                    viewMode: '2D',
-                    mapStyle: 'amap://styles/whitesmoke',
-                    showLabel: true,
-                    features: ['bg', 'road', 'building', 'point'],
-                    zoomEnable: true,
-                    dragEnable: true
+                var latlngs = points.map(function(p) {
+                    return [p.pos[1], p.pos[0]];
                 });
 
-                if (points.length > 1) {
-                    new AMap.Polyline({
-                        path: points.map(function(p) { return p.pos; }),
-                        geodesic: true,
-                        strokeColor: '#3b82f6',
-                        strokeWeight: 2,
-                        strokeStyle: 'dashed',
-                        strokeDasharray: [5, 6],
-                        lineJoin: 'round',
-                        map: dayMap
-                    });
+                var map = L.map(containerId, {
+                    zoomControl: true,
+                    attributionControl: false,
+                    scrollWheelZoom: false,
+                    dragging: true,
+                    tap: true,
+                    touchZoom: true
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    minZoom: 3,
+                    subdomains: 'abcd'
+                }).addTo(map);
+
+                if (latlngs.length > 1) {
+                    L.polyline(latlngs, {
+                        color: '#3b82f6',
+                        weight: 2,
+                        dashArray: '5, 8',
+                        opacity: 0.75
+                    }).addTo(map);
                 }
 
                 points.forEach(function(p, idx) {
@@ -2513,50 +3185,65 @@
                     var isLast = idx === points.length - 1;
                     var bgColor = isFirst ? '#10b981' : (isLast ? '#ef4444' : '#3b82f6');
 
-                    new AMap.Marker({
-                        position: p.pos,
-                        map: dayMap,
-                        zIndex: 200,
-                        content:
-                            '<div style="' +
-                                'background:' + bgColor + ';' +
-                                'color:white;' +
-                                'width:22px;height:22px;' +
-                                'border-radius:50%;' +
-                                'display:flex;align-items:center;justify-content:center;' +
-                                'font-size:11px;font-weight:700;' +
-                                'border:2px solid white;' +
-                                'box-shadow:0 2px 6px rgba(0,0,0,0.3);' +
-                                'font-family:inherit;' +
-                            '">' + (idx + 1) + '</div>',
-                        offset: new AMap.Pixel(-11, -11)
+                    var icon = L.divIcon({
+                        className: 'day-map-marker',
+                        html: '<div style="' +
+                            'background:' + bgColor + ';' +
+                            'color:white;' +
+                            'width:22px;height:22px;' +
+                            'border-radius:50%;' +
+                            'display:flex;align-items:center;justify-content:center;' +
+                            'font-size:11px;font-weight:700;' +
+                            'border:2px solid white;' +
+                            'box-shadow:0 2px 6px rgba(0,0,0,0.3);' +
+                            'font-family:inherit;' +
+                        '">' + (idx + 1) + '</div>',
+                        iconSize: [22, 22],
+                        iconAnchor: [11, 11]
                     });
 
-                    new AMap.Text({
-                        text: p.name,
-                        position: p.pos,
-                        map: dayMap,
-                        anchor: 'top-center',
-                        zIndex: 150,
-                        offset: new AMap.Pixel(0, 8),
-                        style: {
-                            'background-color': '#ffffff',
-                            'border': '1px solid #e2e8f0',
-                            'border-radius': '6px',
-                            'padding': '2px 6px',
-                            'color': '#0f172a',
-                            'font-size': '10px',
-                            'font-weight': '600',
-                            'white-space': 'nowrap',
-                            'box-shadow': '0 1px 4px rgba(0,0,0,0.08)',
-                            'font-family': 'inherit'
-                        }
+                    L.marker(latlngs[idx], { icon: icon })
+                        .addTo(map)
+                        .bindPopup('<b>' + (idx + 1) + '. ' + p.name + '</b>');
+
+                    var labelIcon = L.divIcon({
+                        className: 'day-map-label',
+                        html: '<div style="' +
+                            'background:#ffffff;' +
+                            'border:1px solid #e2e8f0;' +
+                            'border-radius:6px;' +
+                            'padding:2px 6px;' +
+                            'color:#0f172a;' +
+                            'font-size:10px;' +
+                            'font-weight:600;' +
+                            'white-space:nowrap;' +
+                            'box-shadow:0 1px 4px rgba(0,0,0,0.08);' +
+                            'font-family:inherit;' +
+                            'transform:translateY(-24px);' +
+                        '">' + p.name + '</div>',
+                        iconSize: [0, 0],
+                        iconAnchor: [0, 0]
                     });
+
+                    L.marker(latlngs[idx], { icon: labelIcon, interactive: false, zIndexOffset: -100 }).addTo(map);
                 });
 
-                if (!center && points.length > 1) {
-                    dayMap.setFitView(null, false, [40, 40, 40, 40]);
+                if (!center && latlngs.length > 1) {
+                    var bounds = L.latLngBounds(latlngs);
+                    map.fitBounds(bounds, { padding: [40, 40] });
+                } else if (center) {
+                    map.setView([center[1], center[0]], zoom || 12);
+                } else {
+                    map.setView(latlngs[0], zoom || 12);
                 }
+
+                el._leaflet_map = map;
+
+                setTimeout(function() {
+                    if (el.offsetWidth > 0) {
+                        map.invalidateSize();
+                    }
+                }, 100);
             }
 
             initDayMap('map-day1', [
