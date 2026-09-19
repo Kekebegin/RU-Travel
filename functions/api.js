@@ -1,65 +1,140 @@
 // functions/api.js
-// Cloudflare Pages Functions：处理 /api/records 的 GET / POST / DELETE 请求
+// Cloudflare Pages Functions：处理 /api/records 的 GET / POST / DELETE / OPTIONS 请求
 
 export async function onRequest(context) {
   const { request, env } = context;
   const method = request.method;
 
+  // 统一的响应头，包含 CORS
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type'
   };
 
+  // ---------- OPTIONS 预检请求 ----------
   if (method === 'OPTIONS') {
-    return new Response(null, { headers });
+    return new Response(null, { status: 204, headers });
   }
 
-  // GET /api/records —— 读取所有记录
+  // ---------- GET：读取所有记录 ----------
   if (method === 'GET') {
     try {
+      if (!env.DB) {
+        return new Response(
+          JSON.stringify({ error: 'D1 binding "DB" is missing. Please bind a D1 database with variable name DB.' }),
+          { status: 500, headers }
+        );
+      }
       const { results } = await env.DB.prepare(
         'SELECT id, datetime, person, amountCNY, note, currency, originalAmount FROM records ORDER BY datetime DESC'
       ).all();
-      return new Response(JSON.stringify(results || []), { headers });
+      return new Response(JSON.stringify(results || []), { status: 200, headers });
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      console.error('GET /api/records error:', e);
+      return new Response(
+        JSON.stringify({ error: e.message || 'Unknown error' }),
+        { status: 500, headers }
+      );
     }
   }
 
-  // POST /api/records —— 添加一条记录
+  // ---------- POST：添加一条记录 ----------
   if (method === 'POST') {
     try {
-      const body = await request.json();
-      const { id, datetime, person, amountCNY, note, currency, originalAmount } = body;
-      if (!id || !datetime || !person || amountCNY == null) {
-        return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers });
+      if (!env.DB) {
+        return new Response(
+          JSON.stringify({ error: 'D1 binding "DB" is missing. Please bind a D1 database with variable name DB.' }),
+          { status: 500, headers }
+        );
       }
+
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid JSON body' }),
+          { status: 400, headers }
+        );
+      }
+
+      const { id, datetime, person, amountCNY, note, currency, originalAmount } = body;
+
+      if (!id || !datetime || !person || amountCNY == null) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required fields: id, datetime, person, amountCNY' }),
+          { status: 400, headers }
+        );
+      }
+
       await env.DB.prepare(
         `INSERT INTO records (id, datetime, person, amountCNY, note, currency, originalAmount)
          VALUES (?, ?, ?, ?, ?, ?, ?)`
-      ).bind(id, datetime, person, amountCNY, note || '', currency || 'CNY', originalAmount || amountCNY).run();
-      return new Response(JSON.stringify({ ok: true }), { headers });
+      )
+        .bind(
+          id,
+          datetime,
+          person,
+          Number(amountCNY),
+          note || '',
+          currency || 'CNY',
+          originalAmount != null ? Number(originalAmount) : Number(amountCNY)
+        )
+        .run();
+
+      return new Response(
+        JSON.stringify({ ok: true, id: id }),
+        { status: 200, headers }
+      );
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      console.error('POST /api/records error:', e);
+      return new Response(
+        JSON.stringify({ error: e.message || 'Unknown error' }),
+        { status: 500, headers }
+      );
     }
   }
 
-  // DELETE /api/records?id=xxx —— 删除一条记录
+  // ---------- DELETE：删除一条记录 ----------
   if (method === 'DELETE') {
     try {
+      if (!env.DB) {
+        return new Response(
+          JSON.stringify({ error: 'D1 binding "DB" is missing. Please bind a D1 database with variable name DB.' }),
+          { status: 500, headers }
+        );
+      }
+
       const url = new URL(request.url);
       const id = url.searchParams.get('id');
+
       if (!id) {
-        return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400, headers });
+        return new Response(
+          JSON.stringify({ error: 'Missing id parameter' }),
+          { status: 400, headers }
+        );
       }
+
       await env.DB.prepare('DELETE FROM records WHERE id = ?').bind(id).run();
-      return new Response(JSON.stringify({ ok: true }), { headers });
+
+      return new Response(
+        JSON.stringify({ ok: true, id: id }),
+        { status: 200, headers }
+      );
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      console.error('DELETE /api/records error:', e);
+      return new Response(
+        JSON.stringify({ error: e.message || 'Unknown error' }),
+        { status: 500, headers }
+      );
     }
   }
 
-  return new Response('Method not allowed', { status: 405, headers });
+  // ---------- 其他方法 ----------
+  return new Response(
+    JSON.stringify({ error: 'Method not allowed: ' + method }),
+    { status: 405, headers }
+  );
 }
