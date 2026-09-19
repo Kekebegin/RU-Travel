@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>俄罗斯三城 7 日游 · 莫斯科·摩尔曼斯克·圣彼得堡</title>
 
+    <!-- 高德地图（概览页总览地图） -->
     <script>
         window._AMapSecurityConfig = {
             securityJsCode: '0d7f18c42770cc3c23126507d22d05f5'
@@ -12,6 +13,7 @@
     </script>
     <script src="https://webapi.amap.com/maps?v=2.0&key=2d7c381060a90d4729c005d32ea9150a&callback=initAMap"></script>
 
+    <!-- Leaflet（每日行程地图） -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -96,7 +98,6 @@
         }
         .password-error.show { opacity: 1; }
 
-        /* ============ 顶部固定栏（已去掉倒计时） ============ */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -165,7 +166,6 @@
             margin-top: 4px;
         }
 
-        /* 酒店卡片（可折叠） */
         .hotel-card {
             background: white;
             border-radius: 20px;
@@ -521,7 +521,6 @@
         .legend-line.dashed { border-top-style: dashed; }
         .legend-line.train { border-top-color: #f59e0b; }
 
-        /* ============ 交通卡片（含倒计时） ============ */
         .transport-list { display: flex; flex-direction: column; gap: 14px; }
         .transport-card {
             background: white;
@@ -588,7 +587,6 @@
             display: none;
         }
 
-        /* 交通卡片倒计时 */
         .transport-countdown {
             display: flex;
             align-items: center;
@@ -715,7 +713,6 @@
         }
         .transport-book-link:active { background: #dbeafe; }
 
-        /* 每日行程 */
         .timeline { display: flex; flex-direction: column; gap: 16px; }
         .day-card {
             background: white;
@@ -1440,7 +1437,7 @@
 
         </div>
 
-        <!-- ==================== Tab 2: 交通（含倒计时） ==================== -->
+        <!-- ==================== Tab 2: 交通 ==================== -->
         <div class="tab-content" id="tab-transport">
             <div class="section-title" style="margin-bottom: 14px;">🚆 交通行程</div>
             <div class="transport-list">
@@ -2304,9 +2301,7 @@
             document.querySelectorAll('.day-card[data-date]').forEach(function(card) {
                 var parts = card.dataset.date.split('-');
                 var dayDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-                if (today > dayDate) {
-                    card.classList.add('collapsed');
-                }
+                if (today > dayDate) card.classList.add('collapsed');
             });
         })();
 
@@ -2320,14 +2315,10 @@
         (function() {
             var now = new Date();
             var currentYear = now.getFullYear();
-
             document.querySelectorAll('.transport-card[data-arrive]').forEach(function(card) {
                 var arriveStr = card.dataset.arrive;
                 var adjustedStr = arriveStr.replace(/^\d{4}/, currentYear);
-                var arriveDate = new Date(adjustedStr);
-                if (now > arriveDate) {
-                    card.classList.add('collapsed');
-                }
+                if (now > new Date(adjustedStr)) card.classList.add('collapsed');
             });
         })();
 
@@ -2341,14 +2332,10 @@
         (function() {
             var now = new Date();
             var currentYear = now.getFullYear();
-
             document.querySelectorAll('.hotel-card[data-checkout]').forEach(function(card) {
                 var checkoutStr = card.dataset.checkout;
                 var adjustedStr = checkoutStr.replace(/^\d{4}/, currentYear);
-                var checkoutDate = new Date(adjustedStr);
-                if (now > checkoutDate) {
-                    card.classList.add('collapsed');
-                }
+                if (now > new Date(adjustedStr)) card.classList.add('collapsed');
             });
         })();
 
@@ -2362,15 +2349,13 @@
                     var departStr = el.dataset.depart;
                     if (!departStr) return;
                     var adjustedStr = departStr.replace(/^\d{4}/, currentYear);
-                    var departDate = new Date(adjustedStr);
-                    var diff = departDate.getTime() - now.getTime();
+                    var diff = new Date(adjustedStr).getTime() - now.getTime();
                     var daysEl = el.querySelector('.cd-days');
                     var labelEl = el.querySelector('.cd-label');
                     var unitEl = el.querySelector('.cd-unit');
                     var iconEl = el.querySelector('.cd-icon');
 
                     if (diff <= 0) {
-                        // 已出发
                         el.classList.add('started');
                         if (iconEl) iconEl.textContent = '✅';
                         if (labelEl) labelEl.textContent = '已出发';
@@ -2380,13 +2365,11 @@
                         el.classList.remove('started');
                         if (iconEl) iconEl.textContent = '⏳';
                         if (labelEl) labelEl.textContent = '距出发';
-                        var days = Math.ceil(diff / 86400000);
-                        if (daysEl) daysEl.textContent = days;
+                        if (daysEl) daysEl.textContent = Math.ceil(diff / 86400000);
                         if (unitEl) unitEl.textContent = '天';
                     }
                 });
             }
-
             updateTransportCountdowns();
             setInterval(updateTransportCountdowns, 60000);
         })();
@@ -2469,13 +2452,11 @@
                 var pad = function(n) { return String(n).padStart(2, '0'); };
                 var weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
-                var bjOffset = 8 * 60;
-                var bjTime = new Date(now.getTime() + (bjOffset + now.getTimezoneOffset()) * 60000);
+                var bjTime = new Date(now.getTime() + (8 * 60 + now.getTimezoneOffset()) * 60000);
                 beijingEl.textContent = pad(bjTime.getHours()) + ':' + pad(bjTime.getMinutes());
                 dateBeijingEl.textContent = (bjTime.getMonth() + 1) + '/' + bjTime.getDate() + ' ' + weekdays[bjTime.getDay()];
 
-                var ruOffset = 3 * 60;
-                var ruTime = new Date(now.getTime() + (ruOffset + now.getTimezoneOffset()) * 60000);
+                var ruTime = new Date(now.getTime() + (3 * 60 + now.getTimezoneOffset()) * 60000);
                 moscowEl.textContent = pad(ruTime.getHours()) + ':' + pad(ruTime.getMinutes());
                 dateMoscowEl.textContent = (ruTime.getMonth() + 1) + '/' + ruTime.getDate() + ' ' + weekdays[ruTime.getDay()];
             }
@@ -2738,7 +2719,7 @@
             });
         })();
 
-        // ============ 记账功能 ============
+        // ============ 记账功能（带保存修复） ============
         (function() {
             var STORAGE_KEY = 'russia_trip_ledger';
             var RATE_CACHE_KEY = 'russia_trip_rates';
@@ -2747,6 +2728,19 @@
             var currentRate = 1;
             var FALLBACK_RATES = { CNY: 1, USD: 7.20, RUB: 0.075, EUR: 7.80 };
             var CURRENCY_SYMBOLS = { CNY: '¥', USD: '$', RUB: '₽', EUR: '€' };
+
+            // 检测 localStorage 是否可用
+            var storageAvailable = (function() {
+                try {
+                    var testKey = '__storage_test__';
+                    localStorage.setItem(testKey, '1');
+                    localStorage.removeItem(testKey);
+                    return true;
+                } catch (e) {
+                    console.warn('localStorage 不可用，记录仅保存在当前会话中', e);
+                    return false;
+                }
+            })();
 
             try {
                 var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -2761,8 +2755,38 @@
                 if (typeof r.note !== 'string') r.note = '';
             });
 
+            // 保存记录（带错误提示 + 写入验证）
             function saveRecords() {
-                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch (e) {}
+                if (!storageAvailable) return false;
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                    var verify = localStorage.getItem(STORAGE_KEY);
+                    if (!verify) return false;
+                    var parsed = JSON.parse(verify);
+                    if (!Array.isArray(parsed) || parsed.length !== records.length) {
+                        console.warn('写入验证失败：长度不一致');
+                        return false;
+                    }
+                    return true;
+                } catch (e) {
+                    console.error('保存记账记录失败：', e);
+                    if (e.name === 'QuotaExceededError') {
+                        showStorageError('存储空间已满，请清理浏览器数据后重试');
+                    } else {
+                        showStorageError('保存失败：' + e.message);
+                    }
+                    return false;
+                }
+            }
+
+            function showStorageError(msg) {
+                var errorEl = document.getElementById('ledgerError');
+                if (!errorEl) return;
+                errorEl.style.color = '#ef4444';
+                errorEl.textContent = msg;
+                setTimeout(function() {
+                    if (errorEl.textContent === msg) errorEl.textContent = '';
+                }, 5000);
             }
 
             var rateCache = {};
@@ -2774,6 +2798,7 @@
             }
 
             function saveRateCache() {
+                if (!storageAvailable) return;
                 try { localStorage.setItem(RATE_CACHE_KEY, JSON.stringify(rateCache)); } catch (e) {}
             }
 
@@ -2897,7 +2922,18 @@
                     datetime: datetime, person: selectedPerson, currency: currency,
                     originalAmount: amount, rate: currentRate, amountCNY: cnyAmount, note: note
                 });
-                saveRecords(); render();
+                var savedOk = saveRecords();
+                render();
+
+                if (savedOk) {
+                    errorEl.style.color = '#10b981';
+                    errorEl.textContent = '✓ 已保存';
+                    setTimeout(function() { if (errorEl.textContent === '✓ 已保存') errorEl.textContent = ''; }, 2000);
+                } else if (!storageAvailable) {
+                    errorEl.style.color = '#f59e0b';
+                    errorEl.textContent = '⚠ 浏览器存储不可用，记录仅在本次会话有效';
+                }
+
                 amountInput.value = ''; noteInput.value = ''; convertDisplay.textContent = '';
                 if (currency === 'CNY') currentRate = 1;
                 updateSplit();
@@ -3240,9 +3276,7 @@
                 el._leaflet_map = map;
 
                 setTimeout(function() {
-                    if (el.offsetWidth > 0) {
-                        map.invalidateSize();
-                    }
+                    if (el.offsetWidth > 0) map.invalidateSize();
                 }, 100);
             }
 
