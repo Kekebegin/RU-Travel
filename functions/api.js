@@ -3,9 +3,8 @@
 
 export async function onRequest(context) {
   const { request, env } = context;
-  const method = request.method;
+  const method = request.method.toUpperCase();
 
-  // 统一的响应头，包含 CORS
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
@@ -23,7 +22,7 @@ export async function onRequest(context) {
     try {
       if (!env.DB) {
         return new Response(
-          JSON.stringify({ error: 'D1 binding "DB" is missing. Please bind a D1 database with variable name DB.' }),
+          JSON.stringify({ error: 'D1 binding "DB" is missing.' }),
           { status: 500, headers }
         );
       }
@@ -32,7 +31,6 @@ export async function onRequest(context) {
       ).all();
       return new Response(JSON.stringify(results || []), { status: 200, headers });
     } catch (e) {
-      console.error('GET /api/records error:', e);
       return new Response(
         JSON.stringify({ error: e.message || 'Unknown error' }),
         { status: 500, headers }
@@ -45,7 +43,7 @@ export async function onRequest(context) {
     try {
       if (!env.DB) {
         return new Response(
-          JSON.stringify({ error: 'D1 binding "DB" is missing. Please bind a D1 database with variable name DB.' }),
+          JSON.stringify({ error: 'D1 binding "DB" is missing.' }),
           { status: 500, headers }
         );
       }
@@ -64,32 +62,28 @@ export async function onRequest(context) {
 
       if (!id || !datetime || !person || amountCNY == null) {
         return new Response(
-          JSON.stringify({ error: 'Missing required fields: id, datetime, person, amountCNY' }),
+          JSON.stringify({ error: 'Missing required fields' }),
           { status: 400, headers }
         );
       }
 
       await env.DB.prepare(
-        `INSERT INTO records (id, datetime, person, amountCNY, note, currency, originalAmount)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`
-      )
-        .bind(
-          id,
-          datetime,
-          person,
-          Number(amountCNY),
-          note || '',
-          currency || 'CNY',
-          originalAmount != null ? Number(originalAmount) : Number(amountCNY)
-        )
-        .run();
+        'INSERT INTO records (id, datetime, person, amountCNY, note, currency, originalAmount) VALUES (?, ?, ?, ?, ?, ?, ?)'
+      ).bind(
+        String(id),
+        String(datetime),
+        String(person),
+        Number(amountCNY),
+        note ? String(note) : '',
+        currency ? String(currency) : 'CNY',
+        originalAmount != null ? Number(originalAmount) : Number(amountCNY)
+      ).run();
 
       return new Response(
         JSON.stringify({ ok: true, id: id }),
         { status: 200, headers }
       );
     } catch (e) {
-      console.error('POST /api/records error:', e);
       return new Response(
         JSON.stringify({ error: e.message || 'Unknown error' }),
         { status: 500, headers }
@@ -102,7 +96,7 @@ export async function onRequest(context) {
     try {
       if (!env.DB) {
         return new Response(
-          JSON.stringify({ error: 'D1 binding "DB" is missing. Please bind a D1 database with variable name DB.' }),
+          JSON.stringify({ error: 'D1 binding "DB" is missing.' }),
           { status: 500, headers }
         );
       }
@@ -124,7 +118,6 @@ export async function onRequest(context) {
         { status: 200, headers }
       );
     } catch (e) {
-      console.error('DELETE /api/records error:', e);
       return new Response(
         JSON.stringify({ error: e.message || 'Unknown error' }),
         { status: 500, headers }
@@ -132,9 +125,13 @@ export async function onRequest(context) {
     }
   }
 
-  // ---------- 其他方法 ----------
+  // ---------- 其他方法：返回 405，并附带实际收到的方法名 ----------
   return new Response(
-    JSON.stringify({ error: 'Method not allowed: ' + method }),
+    JSON.stringify({
+      error: 'Method not allowed',
+      receivedMethod: method,
+      receivedUrl: request.url
+    }),
     { status: 405, headers }
   );
 }
