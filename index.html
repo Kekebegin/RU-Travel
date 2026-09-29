@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- ============ Firebase SDK（模块化 v10）============ -->
     <script type="module">
-        // ⚠️ 把下面替换成你自己的 Firebase 配置
         window.__FIREBASE_CONFIG__ = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -37,7 +35,6 @@
         const configured = cfg && cfg.databaseURL && !cfg.databaseURL.includes('YOUR_PROJECT');
 
         if (!configured) {
-            console.warn('[Sync] Firebase 未配置，使用本地 localStorage 模式');
             window.__SYNC__ = { mode: 'local', ready: Promise.resolve(false) };
         } else {
             try {
@@ -48,9 +45,7 @@
                     ready: Promise.resolve(true),
                     db, ref, onValue, set, remove
                 };
-                console.log('[Sync] Firebase 已连接，多人实时同步已启用');
             } catch (e) {
-                console.error('[Sync] Firebase 初始化失败，回退本地模式', e);
                 window.__SYNC__ = { mode: 'local', ready: Promise.resolve(false) };
             }
         }
@@ -207,6 +202,13 @@
         .time-stamp { font-weight: 600; color: #0f172a; min-width: 68px; font-variant-numeric: tabular-nums; font-size: 13px; }
         .time-desc { color: #334155; flex: 1; }
         .time-desc small { color: #94a3b8; font-size: 11.5px; display: block; margin-top: 2px; }
+        .time-desc .hotel-loc { color: #7c3aed; font-weight: 600; font-size: 11.5px; display: inline-block; margin-top: 2px; }
+        .time-desc .hotel-loc::before { content: "🏨 "; }
+
+        .need-ticket { color: #ea580c; font-weight: 700; }
+        .need-ticket::before { content: "🎫 "; font-weight: 400; }
+        .time-desc .need-ticket { font-size: 13px; }
+        .time-desc small .need-ticket { font-size: 11.5px; }
 
         .day-map { height: 190px; width: 100%; border-radius: 18px; margin: 12px 0 10px; background: #eef2f6; overflow: hidden; border: 1px solid #e2e8f0; }
         .day-map-marker, .day-map-label { background: transparent !important; border: none !important; }
@@ -259,6 +261,7 @@
         .prep-link .emoji { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
         .prep-link .text { flex: 1; }
         .prep-link .text small { display: block; color: #94a3b8; font-size: 11.5px; margin-top: 2px; }
+        .prep-link .text small.need-ticket { color: #ea580c; font-weight: 600; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 2000; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid rgba(0, 0, 0, 0.06); display: flex; padding-bottom: env(safe-area-inset-bottom, 0); box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04); }
         .nav-btn { flex: 1; background: transparent; border: none; padding: 10px 0 12px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; font-family: inherit; color: #94a3b8; transition: color 0.2s ease; position: relative; }
@@ -309,9 +312,7 @@
 
     <main class="container">
 
-        <!-- ==================== Tab 1: 概览 ==================== -->
         <div class="tab-content active" id="tab-overview">
-
             <div class="clocks-card">
                 <div class="clock-item">
                     <div class="clock-label"><span class="flag">🇨🇳</span> 北京时间</div>
@@ -339,11 +340,11 @@
                         <div class="flight-time">飞行约 10 小时</div>
                     </div>
                     <div class="flight-slide">
-                        <div class="flight-code">CZ6565 · 10月7日</div>
+                        <div class="flight-code">CZ656 · 10月7日</div>
                         <div class="flight-route">
                             莫斯科 SVO 18:00 <span class="arrow">→</span> 广州 CAN 次日 08:30
                         </div>
-                        <div class="flight-time">飞行约 9.5 小时 · 请核实航班号</div>
+                        <div class="flight-time">飞行约 9.5 小时</div>
                     </div>
                 </div>
                 <div class="slide-dots" id="slideDots">
@@ -372,16 +373,16 @@
                         <span class="hotel-stay-dates">3 晚</span>
                     </div>
                     <div class="hotel-header-right">
-                        <span class="hotel-header-name">莫斯科中心巴赫鲁希纳宜必思酒店</span>
+                        <span class="hotel-header-name">阿尔巴特蓬塔酒店</span>
                         <span class="hotel-arrow">▼</span>
                     </div>
                 </div>
                 <div class="hotel-body">
-                    <div class="hotel-name">莫斯科中心巴赫鲁希纳宜必思酒店</div>
-                    <div class="hotel-room-type">🛏️ 房型待确认</div>
+                    <div class="hotel-name">阿尔巴特蓬塔酒店（Pentahotel Moscow, Arbat）</div>
+                    <div class="hotel-room-type">🛏️ 标准双床房</div>
                     <div class="hotel-address">
                         <span class="emoji">📍</span>
-                        <span>Moscow Bakhrushina Ibis Hotel<br>（莫斯科市中心，具体地址与入住信息待补充）</span>
+                        <span>新阿尔巴特街 15 号，莫斯科，119019<br>（Novy Arbat Ave, 15, Moscow）</span>
                     </div>
                 </div>
             </div>
@@ -393,16 +394,16 @@
                         <span class="hotel-stay-dates">2 晚</span>
                     </div>
                     <div class="hotel-header-right">
-                        <span class="hotel-header-name">圣彼得堡酒店 · 待定</span>
+                        <span class="hotel-header-name">Hotel Indigo 圣彼得堡-涅瓦酒店</span>
                         <span class="hotel-arrow">▼</span>
                     </div>
                 </div>
                 <div class="hotel-body">
-                    <div class="hotel-name">圣彼得堡住宿</div>
-                    <div class="hotel-room-type">🛏️ 待定</div>
+                    <div class="hotel-name">Hotel Indigo 圣彼得堡-涅瓦酒店</div>
+                    <div class="hotel-room-type">🛏️ 标准大床房</div>
                     <div class="hotel-address">
                         <span class="emoji">📍</span>
-                        <span>酒店信息待确认<br>（建议选涅瓦大街或莫斯科火车站附近）</span>
+                        <span>柴可夫斯基街 17 号，圣彼得堡<br>（Chaykovskogo Street, 17, St Petersburg）</span>
                     </div>
                 </div>
             </div>
@@ -414,23 +415,21 @@
                         <span class="hotel-stay-dates">1 晚</span>
                     </div>
                     <div class="hotel-header-right">
-                        <span class="hotel-header-name">莫斯科酒店 · 待定</span>
+                        <span class="hotel-header-name">莫斯科索科尔尼基智选假日酒店</span>
                         <span class="hotel-arrow">▼</span>
                     </div>
                 </div>
                 <div class="hotel-body">
-                    <div class="hotel-name">莫斯科住宿（10/6 晚）</div>
-                    <div class="hotel-room-type">🛏️ 待定</div>
+                    <div class="hotel-name">莫斯科索科尔尼基智选假日酒店</div>
+                    <div class="hotel-room-type">🛏️ 标准大床房</div>
                     <div class="hotel-address">
                         <span class="emoji">📍</span>
-                        <span>酒店信息待确认<br>（建议选靠近 SVO 机场或市中心方便次日返程）</span>
+                        <span>鲁萨科夫斯卡娅街 24 号，莫斯科，107014<br>（Rusakovskaya Ulitsa, 24, Moscow）</span>
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ==================== Tab 2: 交通 ==================== -->
         <div class="tab-content" id="tab-transport">
             <div class="section-title" style="margin-bottom: 14px;">🚆 交通行程</div>
             <div class="transport-list">
@@ -485,7 +484,7 @@
                     </div>
                 </div>
 
-                <div class="transport-card" data-depart="2026-10-04T15:00:00+03:00" data-arrive="2026-10-04T19:10:00+03:00">
+                <div class="transport-card" data-depart="2026-10-04T13:40:00+03:00" data-arrive="2026-10-04T19:15:00+03:00">
                     <div class="transport-card-header" onclick="toggleTransportCard(this)">
                         <div class="transport-header-left">
                             <span class="transport-day-badge">Day 4</span>
@@ -498,7 +497,7 @@
                         </div>
                     </div>
                     <div class="transport-card-body">
-                        <div class="transport-countdown" data-depart="2026-10-04T15:00:00+03:00">
+                        <div class="transport-countdown" data-depart="2026-10-04T13:40:00+03:00">
                             <span class="cd-icon">⏳</span>
                             <span class="cd-label">距出发</span>
                             <span class="cd-days">--</span>
@@ -510,32 +509,32 @@
                             <span class="transport-city">圣彼得堡</span>
                         </div>
                         <div class="transport-meta">
-                            <div class="transport-meta-item">高铁 <strong>Sapsan 767</strong></div>
-                            <div class="transport-meta-item">约 4 小时 10 分</div>
-                            <div class="transport-meta-item">建议提前订票</div>
+                            <div class="transport-meta-item">高铁</div>
+                            <div class="transport-meta-item">约 5 小时 35 分</div>
+                            <div class="transport-meta-item">已订票</div>
                         </div>
                         <div class="transport-times">
                             <div class="transport-time-block">
-                                <div class="transport-time-value">15:00</div>
+                                <div class="transport-time-value">13:40</div>
                                 <div class="transport-time-label">莫斯科 · 列宁格勒站</div>
                             </div>
                             <div class="transport-duration">
                                 <div class="transport-duration-line"></div>
-                                <div class="transport-duration-text">约 4h10m</div>
+                                <div class="transport-duration-text">约 5h35m</div>
                             </div>
                             <div class="transport-time-block">
-                                <div class="transport-time-value">19:10</div>
+                                <div class="transport-time-value">19:15</div>
                                 <div class="transport-time-label">圣彼得堡 · 莫斯科站</div>
                             </div>
                         </div>
                         <div class="transport-footer">
-                            <div class="transport-note">午饭后前往火车站，建议提前 1 小时到站。参考班次：Sapsan 767（15:00–19:10）</div>
+                            <div class="transport-note">上午在酒店附近轻松逛，11:00 前退房出发去火车站</div>
                             <a class="transport-book-link" href="https://pass.rzd.ru" target="_blank">购票</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="transport-card" data-depart="2026-10-06T17:00:00+03:00" data-arrive="2026-10-06T21:10:00+03:00">
+                <div class="transport-card" data-depart="2026-10-06T17:00:00+03:00" data-arrive="2026-10-06T20:57:00+03:00">
                     <div class="transport-card-header" onclick="toggleTransportCard(this)">
                         <div class="transport-header-left">
                             <span class="transport-day-badge">Day 6</span>
@@ -560,9 +559,9 @@
                             <span class="transport-city">莫斯科</span>
                         </div>
                         <div class="transport-meta">
-                            <div class="transport-meta-item">高铁 <strong>Sapsan 769 / 771</strong></div>
-                            <div class="transport-meta-item">约 4 小时</div>
-                            <div class="transport-meta-item">建议提前订票</div>
+                            <div class="transport-meta-item">高铁</div>
+                            <div class="transport-meta-item">约 3 小时 57 分</div>
+                            <div class="transport-meta-item">已订票</div>
                         </div>
                         <div class="transport-times">
                             <div class="transport-time-block">
@@ -571,15 +570,15 @@
                             </div>
                             <div class="transport-duration">
                                 <div class="transport-duration-line"></div>
-                                <div class="transport-duration-text">约 4 小时</div>
+                                <div class="transport-duration-text">约 3h57m</div>
                             </div>
                             <div class="transport-time-block">
-                                <div class="transport-time-value">21:10</div>
+                                <div class="transport-time-value">20:57</div>
                                 <div class="transport-time-label">莫斯科 · 列宁格勒站</div>
                             </div>
                         </div>
                         <div class="transport-footer">
-                            <div class="transport-note">冬宫游览后午饭，取行李前往火车站。参考班次：Sapsan 769（15:13）/ 771</div>
+                            <div class="transport-note">冬宫 + 滴血 + 喀山游览后，15:30 取行李前往火车站</div>
                             <a class="transport-book-link" href="https://pass.rzd.ru" target="_blank">购票</a>
                         </div>
                     </div>
@@ -610,7 +609,7 @@
                             <span class="transport-city">广州</span>
                         </div>
                         <div class="transport-meta">
-                            <div class="transport-meta-item">航班 <strong>CZ6565</strong></div>
+                            <div class="transport-meta-item">航班 <strong>CZ656</strong></div>
                             <div class="transport-meta-item">南方航空</div>
                             <div class="transport-meta-item">直飞 · 已订</div>
                         </div>
@@ -629,31 +628,28 @@
                             </div>
                         </div>
                         <div class="transport-footer">
-                            <div class="transport-note">请核实航班号及准确起飞时间 · 建议提前 3 小时到机场</div>
+                            <div class="transport-note">建议提前 3 小时到机场</div>
                             <a class="transport-book-link" href="https://www.csair.com" target="_blank">官网</a>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="footer-note" style="margin-top: 20px;">
                 <strong>📌 班次说明</strong><br>
                 · 去程 CZ8027 广州 08:55 起飞，莫斯科当地时间 14:05 抵达，飞行约 10 小时。<br>
-                · 返程 CZ6565 莫斯科 18:00 起飞，次日 08:30 抵达广州（<strong>请核实航班号与准确起飞时间</strong>）。<br>
-                · 10/4 莫斯科 → 圣彼得堡高铁推荐 15:00 出发（Sapsan 767），约 4 小时 10 分。<br>
-                · 10/6 圣彼得堡 → 莫斯科高铁推荐 17:00 出发，约 4 小时。<br>
+                · 返程 CZ656 莫斯科 18:00 起飞，次日 08:30 抵达广州。<br>
+                · 10/4 莫斯科 → 圣彼得堡高铁 13:40 出发，19:15 抵达，约 5 小时 35 分。<br>
+                · 10/6 圣彼得堡 → 莫斯科高铁 17:00 出发，20:57 抵达，约 3 小时 57 分。<br>
                 · 莫斯科/圣彼得堡与北京时差 -5 小时。<br>
                 · 高铁建议提前 1 小时到站，国际航班建议提前 3 小时到机场。
             </div>
         </div>
 
-        <!-- ==================== Tab 3: 行程 ==================== -->
         <div class="tab-content" id="tab-itinerary">
             <div class="section-title" style="margin-bottom: 14px;">📅 每日详细行程</div>
             <div class="timeline" id="timeline">
 
-                <!-- Day 1 -->
                 <div class="day-card" data-day="1" data-date="2026-10-01">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -667,14 +663,14 @@
                     </div>
                     <div class="day-body">
                         <div class="timeline-items">
-                            <div class="time-item"><span class="time-stamp">08:55</span><span class="time-desc">白云机场出发 CZ8027<small>飞行约 10 小时</small></span></div>
+                            <div class="time-item"><span class="time-stamp">08:55</span><span class="time-desc">白云机场出发 CZ8027<small>飞行约 10 小时 · 已订机票</small></span></div>
                             <div class="time-item"><span class="time-stamp">14:05</span><span class="time-desc">抵达谢列梅捷沃机场（SVO），入境取行李</span></div>
-                            <div class="time-item"><span class="time-stamp">14:30–16:00</span><span class="time-desc">前往酒店，办理入住<small>建议预订接机 · 机场到市区约 1–1.5h</small></span></div>
+                            <div class="time-item"><span class="time-stamp">14:30–16:00</span><span class="time-desc">前往酒店，办理入住<small>建议预订接机 · 机场到市区约 1–1.5h</small><span class="hotel-loc">阿尔巴特蓬塔酒店（新阿尔巴特街 15 号）</span></span></div>
                             <div class="time-item"><span class="time-stamp">16:00–16:45</span><span class="time-desc">酒店休整，倒时差</span></div>
-                            <div class="time-item"><span class="time-stamp">17:00–17:40</span><span class="time-desc">红场漫步 · 圣瓦西里大教堂外观<small>外观免费 · 红场 24 小时开放</small></span></div>
+                            <div class="time-item"><span class="time-stamp">17:00–17:40</span><span class="time-desc">红场漫步 · 圣瓦西里大教堂外观<small>外观免费 · 红场 24 小时开放 · <span class="need-ticket">入内需购票（约 2000 卢布）</span></small></span></div>
                             <div class="time-item"><span class="time-stamp">17:40–18:10</span><span class="time-desc">古姆百货<small>免费进入 · 营业 10:00–22:00</small></span></div>
                             <div class="time-item"><span class="time-stamp">18:15–19:15</span><span class="time-desc">红场周边晚餐</span></div>
-                            <div class="time-item"><span class="time-stamp">19:30</span><span class="time-desc">回酒店休息<small>列宁墓周四开放至 13:00，抵达晚赶不上，改 10/3</small></span></div>
+                            <div class="time-item"><span class="time-stamp">19:30</span><span class="time-desc">回酒店休息<small>列宁墓周四开放至 13:00，抵达晚赶不上，改 10/3</small><span class="hotel-loc">阿尔巴特蓬塔酒店</span></span></div>
                         </div>
                         <div class="day-map" id="map-day1"></div>
                         <div class="day-weather" data-city="moscow" data-date="10-01">
@@ -689,7 +685,6 @@
                     </div>
                 </div>
 
-                <!-- Day 2 -->
                 <div class="day-card" data-day="2" data-date="2026-10-02">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -697,22 +692,20 @@
                             <span class="day-date">10/2 周五</span>
                         </div>
                         <div class="day-header-right">
-                            <span class="day-city">莫斯科</span>
+                            <span class="day-city">莫斯科（市区 + 武装力量大教堂）</span>
                             <span class="day-arrow">▼</span>
                         </div>
                     </div>
                     <div class="day-body">
                         <div class="timeline-items">
-                            <div class="time-item"><span class="time-stamp">09:30–10:00</span><span class="time-desc">前往克里姆林宫</span></div>
-                            <div class="time-item"><span class="time-stamp">10:00–12:00</span><span class="time-desc">克里姆林宫军械库<small>周四闭馆 · 10月开放 10:00–17:00（16:00 停止售票）· 需单独购票约 1000 卢布 · 分时段入场，建议提前订</small></span></div>
-                            <div class="time-item"><span class="time-stamp">12:00–13:00</span><span class="time-desc">午餐</span></div>
-                            <div class="time-item"><span class="time-stamp">13:00–14:00</span><span class="time-desc">亚历山大花园散步<small>免费</small></span></div>
-                            <div class="time-item"><span class="time-stamp">14:00–15:30</span><span class="time-desc">红场周边 · 圣瓦西里大教堂（可选入内）<small>入内约 2000 卢布，外观免费</small></span></div>
-                            <div class="time-item"><span class="time-stamp">15:30–16:30</span><span class="time-desc">麻雀山观景台<small>免费 · 看莫斯科大学主楼全景</small></span></div>
-                            <div class="time-item"><span class="time-stamp">16:30–17:30</span><span class="time-desc">莫斯科大学主楼外观<small>免费</small></span></div>
-                            <div class="time-item"><span class="time-stamp">17:30–19:30</span><span class="time-desc">莫斯科地铁环线：基辅站 · 新村庄站 · 共青团站<small>地铁票约 75 卢布/次 · 现场购买</small></span></div>
-                            <div class="time-item"><span class="time-stamp">19:30–21:00</span><span class="time-desc">老阿尔巴特街<small>免费 · 纪念品、街头艺人</small></span></div>
-                            <div class="time-item"><span class="time-stamp">21:00</span><span class="time-desc">晚餐后回酒店</span></div>
+                            <div class="time-item"><span class="time-stamp">09:00–10:30</span><span class="time-desc">基督救世主大教堂<small>免费/低价 · 开放 10:00–18:00 · <span class="need-ticket">观景台 400 卢布</span></small></span></div>
+                            <div class="time-item"><span class="time-stamp">10:30–11:30</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">11:30–12:30</span><span class="time-desc">打车前往武装力量大教堂<small>建议 Yandex Go · 约 1 小时 · 约 2500–3500 卢布</small></span></div>
+                            <div class="time-item"><span class="time-stamp">12:30–16:30</span><span class="time-desc">武装力量大教堂 + 记忆之路博物馆<small>教堂免费 · 每日 08:00–21:00 · 「记忆之路」博物馆周二–周五 10:00–19:00，周末 09:00–21:00，周一闭馆 · 建议预留 4 小时</small></span></div>
+                            <div class="time-item"><span class="time-stamp">16:30–17:30</span><span class="time-desc">返程回市区<small>⚠️ 返程车较少，务必提前约好返程车或包车</small></span></div>
+                            <div class="time-item"><span class="time-stamp">17:30–19:00</span><span class="time-desc">老阿尔巴特街<small>免费 · 纪念品、街头艺人 · 就在酒店楼下</small><span class="hotel-loc">阿尔巴特蓬塔酒店</span></span></div>
+                            <div class="time-item"><span class="time-stamp">19:00–20:30</span><span class="time-desc">晚餐</span></div>
+                            <div class="time-item"><span class="time-stamp">20:30</span><span class="time-desc">回酒店</span></div>
                         </div>
                         <div class="day-map" id="map-day2"></div>
                         <div class="day-weather" data-city="moscow" data-date="10-02">
@@ -720,13 +713,12 @@
                         </div>
                         <div class="booking-links">
                             <div class="label">🔖 预约 / 购票</div>
-                            <a href="https://www.kreml.ru" target="_blank">克里姆林宫官网（军械库门票）</a>
+                            <a href="https://cn.1418museum.ru" target="_blank">武装力量大教堂 / 记忆之路博物馆官网</a>
                         </div>
-                        <div class="day-tip"><span class="emoji">💡</span> 军械库 10 月开放时间 10:00–17:00，周四闭馆，16:00 停止售票。分时段入场，务必提前在官网预订。</div>
+                        <div class="day-tip"><span class="emoji">💡</span> 武装力量大教堂免费，但位置偏远（爱国者公园内），打车单程约 1 小时。返程车辆少，<strong>务必提前约好返程车</strong>。教堂 + 记忆之路博物馆建议预留 3–4 小时。</div>
                     </div>
                 </div>
 
-                <!-- Day 3 -->
                 <div class="day-card" data-day="3" data-date="2026-10-03">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -740,16 +732,17 @@
                     </div>
                     <div class="day-body">
                         <div class="timeline-items">
-                            <div class="time-item"><span class="time-stamp">09:30–10:00</span><span class="time-desc">前往克里姆林宫，购买教堂广场联票<small>600–1100 卢布 · 看换岗仪式唯一凭证</small></span></div>
-                            <div class="time-item"><span class="time-stamp">10:00–10:50</span><span class="time-desc">列宁墓<small>免费 · 周六开放 10:00–13:00 · 排队进入</small></span></div>
-                            <div class="time-item"><span class="time-stamp">11:00–11:45</span><span class="time-desc">教堂广场提前占位<small>含在联票内 · 建议提前 40 分钟到</small></span></div>
-                            <div class="time-item"><span class="time-stamp">12:00–12:20</span><span class="time-desc">克里姆林宫换岗仪式<small>含在联票内 · 每周六 12:00（4–10 月）· 总统团步兵与骑兵列队仪式</small></span></div>
-                            <div class="time-item"><span class="time-stamp">12:30–14:00</span><span class="time-desc">圣母升天大教堂 · 天使长大教堂 · 伊凡大帝钟楼<small>含在联票内</small></span></div>
-                            <div class="time-item"><span class="time-stamp">14:00–15:00</span><span class="time-desc">午餐</span></div>
-                            <div class="time-item"><span class="time-stamp">15:00–16:00</span><span class="time-desc">克里姆林宫院内自由活动 / 拍照<small>教堂广场外围、钟楼广场</small></span></div>
-                            <div class="time-item"><span class="time-stamp">16:00–17:00</span><span class="time-desc">回酒店休息</span></div>
-                            <div class="time-item"><span class="time-stamp">17:00–19:00</span><span class="time-desc">古姆百货购物 · 红场夜景<small>免费进入</small></span></div>
-                            <div class="time-item"><span class="time-stamp">19:00–21:00</span><span class="time-desc">晚餐后回酒店，收拾行李<small>准备次日去圣彼得堡</small></span></div>
+                            <div class="time-item"><span class="time-stamp">08:30–09:15</span><span class="time-desc">亚历山大花园漫步<small>免费 · 每日 09:00–23:00 · 克里姆林宫西墙外</small></span></div>
+                            <div class="time-item"><span class="time-stamp">09:15–09:45</span><span class="time-desc">到达列宁墓排队<small>周六排队约 1–2 小时，尽量早到</small></span></div>
+                            <div class="time-item"><span class="time-stamp">10:00–11:00</span><span class="time-desc">参观列宁墓<small>免费 · 周六开放 10:00–13:00 · 12:30 停止入场</small></span></div>
+                            <div class="time-item"><span class="time-stamp">11:00–11:45</span><span class="time-desc">前往教堂广场，准备观看换岗<small>不需要占座，准时到达即可</small></span></div>
+                            <div class="time-item"><span class="time-stamp">12:00–12:20</span><span class="time-desc">克里姆林宫换岗仪式<small>每周六 12:00（4–10 月）· 大教堂广场</small></span></div>
+                            <div class="time-item"><span class="time-stamp">12:30–14:00</span><span class="time-desc">教堂广场联票景点<small>圣母升天大教堂 · 天使长大教堂 · 伊凡大帝钟楼 · <span class="need-ticket">教堂广场联票 600–1100 卢布</span></small></span></div>
+                            <div class="time-item"><span class="time-stamp">14:00–14:30</span><span class="time-desc">快速午餐<small>克里姆林宫内简餐或周边快餐</small></span></div>
+                            <div class="time-item"><span class="time-stamp">14:30–16:00</span><span class="time-desc">军械库<small><span class="need-ticket">需单独购票约 1400 卢布 · 预约 14:30 场次 · 周四闭馆，周六正常开放</span> · 参观约 1.5 小时</small></span></div>
+                            <div class="time-item"><span class="time-stamp">16:00–16:40</span><span class="time-desc">钻石库<small><span class="need-ticket">需单独购票 · 预约 16:00 或 16:20 场次 · 导览每 20 分钟一场，13:00–14:00 午休</span> · 参观约 40 分钟</small></span></div>
+                            <div class="time-item"><span class="time-stamp">16:40–17:30</span><span class="time-desc">克里姆林宫院内自由活动<small>可选 · 拍照、纪念品店</small></span></div>
+                            <div class="time-item"><span class="time-stamp">17:30</span><span class="time-desc">离开克里姆林宫，晚餐后回酒店<small>收拾行李，准备次日去圣彼得堡</small><span class="hotel-loc">阿尔巴特蓬塔酒店</span></span></div>
                         </div>
                         <div class="day-map" id="map-day3"></div>
                         <div class="day-weather" data-city="moscow" data-date="10-03">
@@ -757,13 +750,12 @@
                         </div>
                         <div class="booking-links">
                             <div class="label">🔖 预约 / 购票</div>
-                            <a href="https://www.kreml.ru" target="_blank">克里姆林宫官网（教堂广场联票）</a>
+                            <a href="https://www.kreml.ru" target="_blank">克里姆林宫官网（军械库 / 钻石库 / 教堂广场联票）</a>
                         </div>
-                        <div class="day-tip"><span class="emoji">💡</span> 列宁墓周六开放 10:00–13:00，换岗仪式 12:00 开始。建议 11:00 前到教堂广场占位。教堂广场 10 月开放至 17:00。</div>
+                        <div class="day-tip"><span class="emoji">💡</span> <strong>今天全在克里姆林宫及周边。</strong>亚历山大花园免费，早上顺路逛一圈即可。列宁墓排队时间不可控，如果超过 1 小时，可能赶不上换岗仪式，请根据实际情况取舍。军械库预约 14:30 场次，钻石库预约 16:00 或 16:20 场次，务必提前在线购票锁定场次。</div>
                     </div>
                 </div>
 
-                <!-- Day 4 -->
                 <div class="day-card" data-day="4" data-date="2026-10-04">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -777,14 +769,14 @@
                     </div>
                     <div class="day-body">
                         <div class="timeline-items">
-                            <div class="time-item"><span class="time-stamp">09:00–10:30</span><span class="time-desc">基督救世主大教堂<small>免费/低价 · 开放 10:00–18:00 · 观景台 400 卢布</small></span></div>
-                            <div class="time-item"><span class="time-stamp">10:30–11:30</span><span class="time-desc">回酒店取行李，退房</span></div>
-                            <div class="time-item"><span class="time-stamp">11:30–13:00</span><span class="time-desc">午餐</span></div>
-                            <div class="time-item"><span class="time-stamp">13:00–13:30</span><span class="time-desc">前往列宁格勒火车站<small>建议提前 1 小时到站</small></span></div>
-                            <div class="time-item"><span class="time-stamp">15:00–19:10</span><span class="time-desc">莫斯科 → 圣彼得堡 高铁<small>Sapsan 767 · 约 4 小时 10 分</small></span></div>
-                            <div class="time-item"><span class="time-stamp">19:30–20:30</span><span class="time-desc">抵达，入住酒店</span></div>
-                            <div class="time-item"><span class="time-stamp">20:30–21:30</span><span class="time-desc">涅瓦大街散步<small>免费</small></span></div>
-                            <div class="time-item"><span class="time-stamp">21:30</span><span class="time-desc">晚餐，回酒店</span></div>
+                            <div class="time-item"><span class="time-stamp">09:00–10:30</span><span class="time-desc">新阿尔巴特街漫步<small>酒店楼下 · 24 小时超市、餐厅、咖啡馆</small><span class="hotel-loc">阿尔巴特蓬塔酒店（新阿尔巴特街 15 号）</span></span></div>
+                            <div class="time-item"><span class="time-stamp">10:30–11:00</span><span class="time-desc">回酒店取行李，退房</span></div>
+                            <div class="time-item"><span class="time-stamp">11:00–11:45</span><span class="time-desc">前往列宁格勒火车站<small>建议提前 1 小时到站</small></span></div>
+                            <div class="time-item"><span class="time-stamp">11:45–13:00</span><span class="time-desc">火车站附近午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">13:40–19:15</span><span class="time-desc">莫斯科 → 圣彼得堡 高铁<small>约 5 小时 35 分 · 已订票</small></span></div>
+                            <div class="time-item"><span class="time-stamp">19:15–20:00</span><span class="time-desc">抵达，入住酒店<small>建议打车约 15 分钟</small><span class="hotel-loc">Hotel Indigo 圣彼得堡-涅瓦酒店（柴可夫斯基街 17 号）</span></span></div>
+                            <div class="time-item"><span class="time-stamp">20:00–21:30</span><span class="time-desc">涅瓦大街散步 · 晚餐<small>免费 · 从酒店步行约 20 分钟或打车 5 分钟</small></span></div>
+                            <div class="time-item"><span class="time-stamp">21:30</span><span class="time-desc">回酒店</span></div>
                         </div>
                         <div class="day-map" id="map-day4"></div>
                         <div class="day-weather" data-city="moscow" data-date="10-04">
@@ -794,11 +786,10 @@
                             <div class="label">🔖 预约 / 购票</div>
                             <a href="https://pass.rzd.ru" target="_blank">俄铁英文购票页面（莫斯科→圣彼得堡）</a>
                         </div>
-                        <div class="day-tip"><span class="emoji">💡</span> 高铁强烈建议提前订票。推荐 15:00 班次（Sapsan 767），19:10 到达圣彼得堡。</div>
+                        <div class="day-tip"><span class="emoji">💡</span> 高铁 13:40 出发，上午在酒店附近轻松逛即可。新阿尔巴特街就在酒店楼下，有 24 小时超市和餐厅[reference:7]。</div>
                     </div>
                 </div>
 
-                <!-- Day 5 -->
                 <div class="day-card" data-day="5" data-date="2026-10-05">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -813,13 +804,12 @@
                     <div class="day-body">
                         <div class="timeline-items">
                             <div class="time-item"><span class="time-stamp">08:00–09:00</span><span class="time-desc">前往夏宫（彼得霍夫宫）<small>地铁红线至 ABTOBO 站，换乘 200/204 路公交</small></span></div>
-                            <div class="time-item"><span class="time-stamp">09:00–13:00</span><span class="time-desc">夏宫下花园 + 大宫殿<small>下花园 1500–2000 卢布 · 4/25–10/18 开放 · 10 月大宫殿 10:30–17:45 · 喷泉季预计至 10/18，出发前查官网确认</small></span></div>
+                            <div class="time-item"><span class="time-stamp">09:00–13:00</span><span class="time-desc">夏宫下花园 + 大宫殿<small>4/25–10/18 开放 · 10 月大宫殿 10:30–17:45 · <span class="need-ticket">需购票（下花园 1500–2000 卢布 + 大宫殿）· 官网提前确认喷泉季</span></small></span></div>
                             <div class="time-item"><span class="time-stamp">13:00–14:00</span><span class="time-desc">午餐</span></div>
                             <div class="time-item"><span class="time-stamp">14:00–15:30</span><span class="time-desc">返回市区</span></div>
-                            <div class="time-item"><span class="time-stamp">15:30–16:30</span><span class="time-desc">喀山大教堂<small>免费 · 开放 9:00–19:45</small></span></div>
-                            <div class="time-item"><span class="time-stamp">16:30–17:20</span><span class="time-desc">滴血救世主教堂外观<small>外观免费，入内需购票</small></span></div>
-                            <div class="time-item"><span class="time-stamp">17:20–19:00</span><span class="time-desc">涅瓦大街漫步 · 晚餐</span></div>
-                            <div class="time-item"><span class="time-stamp">20:00</span><span class="time-desc">回酒店</span></div>
+                            <div class="time-item"><span class="time-stamp">15:30–17:00</span><span class="time-desc">涅瓦大街漫步<small>免费</small></span></div>
+                            <div class="time-item"><span class="time-stamp">17:00–19:00</span><span class="time-desc">晚餐</span></div>
+                            <div class="time-item"><span class="time-stamp">19:00</span><span class="time-desc">回酒店</span><span class="hotel-loc">Hotel Indigo 圣彼得堡-涅瓦酒店</span></div>
                         </div>
                         <div class="day-map" id="map-day5"></div>
                         <div class="day-weather" data-city="spb" data-date="10-05">
@@ -828,14 +818,11 @@
                         <div class="booking-links">
                             <div class="label">🔖 预约 / 购票</div>
                             <a href="https://peterhofmuseum.ru" target="_blank">夏宫官网（下花园 / 大宫殿门票）</a>
-                            <a href="https://www.spas-na-krovi.ru" target="_blank">滴血救世主教堂官网</a>
-                            <a href="https://www.kazancathedral.ru" target="_blank">喀山大教堂官网</a>
                         </div>
                         <div class="day-tip"><span class="emoji">💡</span> 夏宫下花园 4/25–10/18 开放，10 月大宫殿 10:30–17:45。周一正常开放。冬宫周一闭馆，已调整至 10/6。</div>
                     </div>
                 </div>
 
-                <!-- Day 6 -->
                 <div class="day-card" data-day="6" data-date="2026-10-06">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -849,12 +836,15 @@
                     </div>
                     <div class="day-body">
                         <div class="timeline-items">
-                            <div class="time-item"><span class="time-stamp">10:00–10:30</span><span class="time-desc">前往冬宫</span></div>
-                            <div class="time-item"><span class="time-stamp">10:30–14:00</span><span class="time-desc">冬宫（艾尔米塔什博物馆）<small>周二 11:00–20:00 · 周一闭馆，周三闭馆 · 必须购票，提前官网预订约 800–900 卢布 · 预留 3.5 小时</small></span></div>
-                            <div class="time-item"><span class="time-stamp">14:00–14:45</span><span class="time-desc">午餐</span></div>
-                            <div class="time-item"><span class="time-stamp">14:45–15:30</span><span class="time-desc">返回酒店取行李，前往火车站<small>建议提前 1 小时到站</small></span></div>
-                            <div class="time-item"><span class="time-stamp">17:00–21:10</span><span class="time-desc">圣彼得堡 → 莫斯科 高铁<small>约 4 小时 · 建议提前订票</small></span></div>
-                            <div class="time-item"><span class="time-stamp">21:30–22:00</span><span class="time-desc">抵达莫斯科，入住酒店</span></div>
+                            <div class="time-item"><span class="time-stamp">09:00–09:30</span><span class="time-desc">前往冬宫</span></div>
+                            <div class="time-item"><span class="time-stamp">09:30–13:00</span><span class="time-desc">冬宫（艾尔米塔什博物馆）<small>周二 10:30–18:00 · 周一闭馆 · <span class="need-ticket">必须购票，提前官网预订约 700 卢布</span> · 预留 3.5 小时</small></span></div>
+                            <div class="time-item"><span class="time-stamp">13:00–14:00</span><span class="time-desc">午餐</span></div>
+                            <div class="time-item"><span class="time-stamp">14:00–14:40</span><span class="time-desc">滴血救世主教堂<small>外观免费 · <span class="need-ticket">入内需购票</span> · 离酒店近，打车约 10 分钟</small></span></div>
+                            <div class="time-item"><span class="time-stamp">14:40–15:20</span><span class="time-desc">喀山大教堂<small>免费 · 开放 9:00–19:45 · 与滴血教堂相邻，步行可达</small></span></div>
+                            <div class="time-item"><span class="time-stamp">15:20–16:00</span><span class="time-desc">返回酒店取行李<small>建议提前叫车</small><span class="hotel-loc">Hotel Indigo 圣彼得堡-涅瓦酒店</span></span></div>
+                            <div class="time-item"><span class="time-stamp">16:00–16:30</span><span class="time-desc">前往莫斯科火车站<small>建议提前 1 小时到站</small></span></div>
+                            <div class="time-item"><span class="time-stamp">17:00–20:57</span><span class="time-desc">圣彼得堡 → 莫斯科 高铁<small>约 3 小时 57 分 · 已订票</small></span></div>
+                            <div class="time-item"><span class="time-stamp">21:15–22:00</span><span class="time-desc">抵达莫斯科，入住酒店<small>列宁格勒火车站坐地铁过来很近，3 号口出往右看即可看到酒店</small><span class="hotel-loc">莫斯科索科尔尼基智选假日酒店（鲁萨科夫斯卡娅街 24 号）</span></span></div>
                             <div class="time-item"><span class="time-stamp">22:00</span><span class="time-desc">休息</span></div>
                         </div>
                         <div class="day-map" id="map-day6"></div>
@@ -866,11 +856,10 @@
                             <a href="https://www.hermitagemuseum.org" target="_blank">冬宫（艾尔米塔什）官网购票</a>
                             <a href="https://pass.rzd.ru" target="_blank">俄铁英文购票页面（圣彼得堡→莫斯科）</a>
                         </div>
-                        <div class="day-tip"><span class="emoji">💡</span> 冬宫周二 11:00–20:00 开放，周一/周三闭馆。建议上午前往，游览约 3.5 小时。下午高铁返莫斯科。</div>
+                        <div class="day-tip"><span class="emoji">💡</span> 冬宫周二 10:30–18:00 开放，周一闭馆[reference:8]。滴血救世主教堂和喀山大教堂离酒店很近，打车约 10 分钟[reference:9]。高铁 17:00 出发，务必 15:30 前取到行李。</div>
                     </div>
                 </div>
 
-                <!-- Day 7 -->
                 <div class="day-card" data-day="7" data-date="2026-10-07">
                     <div class="day-header" onclick="toggleDayCard(this)">
                         <div class="day-header-left">
@@ -885,12 +874,12 @@
                     <div class="day-body">
                         <div class="timeline-items">
                             <div class="time-item"><span class="time-stamp">09:00–09:30</span><span class="time-desc">前往特列季亚科夫画廊</span></div>
-                            <div class="time-item"><span class="time-stamp">09:30–11:30</span><span class="time-desc">特列季亚科夫画廊游览<small>10:00–21:00（20:00 前入场）· 周一闭馆 · 门票约 300–500 卢布</small></span></div>
+                            <div class="time-item"><span class="time-stamp">09:30–11:30</span><span class="time-desc">特列季亚科夫画廊游览<small>10:00–21:00（20:00 前入场）· 周一闭馆 · <span class="need-ticket">门票约 300–500 卢布，建议官网预约</span></small></span></div>
                             <div class="time-item"><span class="time-stamp">11:30–12:30</span><span class="time-desc">午餐</span></div>
-                            <div class="time-item"><span class="time-stamp">12:30–13:30</span><span class="time-desc">回酒店取行李，退房</span></div>
+                            <div class="time-item"><span class="time-stamp">12:30–13:30</span><span class="time-desc">回酒店取行李，退房</span><span class="hotel-loc">莫斯科索科尔尼基智选假日酒店</span></div>
                             <div class="time-item"><span class="time-stamp">13:30–14:30</span><span class="time-desc">前往谢列梅捷沃机场（SVO）<small>建议提前 3 小时到达</small></span></div>
                             <div class="time-item"><span class="time-stamp">15:00–18:00</span><span class="time-desc">办理登机、安检</span></div>
-                            <div class="time-item"><span class="time-stamp">18:00+</span><span class="time-desc">CZ6565 返程广州<small>请核实航班号及准确起飞时间</small></span></div>
+                            <div class="time-item"><span class="time-stamp">18:00+</span><span class="time-desc">CZ656 返程广州<small>已订机票</small></span></div>
                         </div>
                         <div class="day-map" id="map-day7"></div>
                         <div class="day-weather" data-city="moscow" data-date="10-07">
@@ -909,7 +898,6 @@
             </div>
         </div>
 
-        <!-- ==================== Tab 4: 准备 ==================== -->
         <div class="tab-content" id="tab-prepare">
             <div class="section-title" style="margin-bottom: 14px;">🎒 出行准备</div>
 
@@ -964,13 +952,14 @@
                 </div>
                 <div class="accordion-body">
                     <div class="accordion-inner">
-                        <a class="prep-link" href="https://www.saint-basils-cathedral.ru" target="_blank"><span class="emoji">⛪</span><span class="text">圣瓦西里大教堂<small>莫斯科 · Day 1 / Day 2</small></span></a>
-                        <a class="prep-link" href="https://www.kreml.ru" target="_blank"><span class="emoji">🏰</span><span class="text">克里姆林宫（军械库 / 教堂广场）<small>莫斯科 · Day 2 / Day 3</small></span></a>
-                        <a class="prep-link" href="https://www.hermitagemuseum.org" target="_blank"><span class="emoji">🏛️</span><span class="text">冬宫（艾尔米塔什博物馆）<small>圣彼得堡 · Day 6</small></span></a>
-                        <a class="prep-link" href="https://www.spas-na-krovi.ru" target="_blank"><span class="emoji">⛪</span><span class="text">滴血救世主教堂<small>圣彼得堡 · Day 5</small></span></a>
-                        <a class="prep-link" href="https://www.kazancathedral.ru" target="_blank"><span class="emoji">⛪</span><span class="text">喀山大教堂<small>圣彼得堡 · Day 5</small></span></a>
-                        <a class="prep-link" href="https://peterhofmuseum.ru" target="_blank"><span class="emoji">⛲</span><span class="text">夏宫（彼得霍夫宫）<small>圣彼得堡 · Day 5</small></span></a>
-                        <a class="prep-link" href="https://www.tretyakovgallery.ru" target="_blank"><span class="emoji">🖼️</span><span class="text">特列季亚科夫画廊<small>莫斯科 · Day 7</small></span></a>
+                        <a class="prep-link" href="https://www.saint-basils-cathedral.ru" target="_blank"><span class="emoji">⛪</span><span class="text">圣瓦西里大教堂<small>莫斯科 · Day 1</small><small class="need-ticket">入内需购票（约 2000 卢布）</small></span></a>
+                        <a class="prep-link" href="https://cn.1418museum.ru" target="_blank"><span class="emoji">⛪</span><span class="text">武装力量大教堂<small>莫斯科郊区爱国者公园 · Day 2</small><small>免费 · 建议预留 4–5 小时（含往返）</small></span></a>
+                        <a class="prep-link" href="https://www.kreml.ru" target="_blank"><span class="emoji">🏰</span><span class="text">克里姆林宫（军械库 / 钻石库 / 教堂广场）<small>莫斯科 · Day 3</small><small class="need-ticket">需购票：军械库约 1400 卢布（预约 14:30 场）；钻石库需单独购票（预约 16:00 或 16:20 场）；教堂广场联票 600–1100 卢布</small></span></a>
+                        <a class="prep-link" href="https://www.hermitagemuseum.org" target="_blank"><span class="emoji">🏛️</span><span class="text">冬宫（艾尔米塔什博物馆）<small>圣彼得堡 · Day 6</small><small class="need-ticket">必须购票（约 700 卢布），务必提前官网预订</small></span></a>
+                        <a class="prep-link" href="https://www.spas-na-krovi.ru" target="_blank"><span class="emoji">⛪</span><span class="text">滴血救世主教堂<small>圣彼得堡 · Day 6</small><small class="need-ticket">入内需购票（外观免费）</small></span></a>
+                        <a class="prep-link" href="https://www.kazancathedral.ru" target="_blank"><span class="emoji">⛪</span><span class="text">喀山大教堂<small>圣彼得堡 · Day 6</small><small>免费</small></span></a>
+                        <a class="prep-link" href="https://peterhofmuseum.ru" target="_blank"><span class="emoji">⛲</span><span class="text">夏宫（彼得霍夫宫）<small>圣彼得堡 · Day 5</small><small class="need-ticket">需购票：下花园 1500–2000 卢布 + 大宫殿</small></span></a>
+                        <a class="prep-link" href="https://www.tretyakovgallery.ru" target="_blank"><span class="emoji">🖼️</span><span class="text">特列季亚科夫画廊<small>莫斯科 · Day 7</small><small class="need-ticket">需购票：约 300–500 卢布，建议官网预约</small></span></a>
                     </div>
                 </div>
             </div>
@@ -982,9 +971,9 @@
                 </div>
                 <div class="accordion-body">
                     <div class="accordion-inner">
-                        <a class="prep-link" href="https://pass.rzd.ru" target="_blank"><span class="emoji">🚄</span><span class="text">俄铁英文购票页面<small>莫斯科 ↔ 圣彼得堡 高铁</small></span></a>
+                        <a class="prep-link" href="https://pass.rzd.ru" target="_blank"><span class="emoji">🚄</span><span class="text">俄铁英文购票页面<small>莫斯科 ↔ 圣彼得堡 高铁</small><small class="need-ticket">两段高铁均需提前订票</small></span></a>
                         <a class="prep-link" href="https://www.aeroexpress.ru" target="_blank"><span class="emoji">🚌</span><span class="text">机场快线 Aeroexpress<small>莫斯科 SVO ↔ 市区</small></span></a>
-                        <a class="prep-link" href="https://www.csair.com" target="_blank"><span class="emoji">✈️</span><span class="text">中国南方航空官网<small>CZ8027 / CZ6565 国际段</small></span></a>
+                        <a class="prep-link" href="https://www.csair.com" target="_blank"><span class="emoji">✈️</span><span class="text">中国南方航空官网<small>CZ8027 / CZ656 国际段</small><small>已订机票</small></span></a>
                     </div>
                 </div>
             </div>
@@ -994,7 +983,9 @@
                 · 免签：中国公民赴俄旅游免签，停留不超过 30 天。<br>
                 · 支付：Visa/Mastercard 不可用，建议 YooMoney 或携带美元/人民币现金兑换。<br>
                 · 俄铁购票：<a href="https://www.rzd.ru" target="_blank">https://www.rzd.ru</a>（英文页面 pass.rzd.ru）<br>
-                · 天气：10 月莫斯科约 5–10°C，圣彼得堡约 10–17°C，早晚温差大，注意保暖。
+                · 天气：10 月莫斯科约 5–10°C，圣彼得堡约 10–17°C，早晚温差大，注意保暖。<br>
+                · <span class="need-ticket">橙色标注</span>的项目为需购票或预约，请提前准备。<br>
+                · <span style="color:#7c3aed;font-weight:600;">🏨 紫色标注</span>的为酒店位置，方便你规划当天动线。
             </div>
         </div>
 
@@ -1019,14 +1010,12 @@
     </div>
 
     <script>
-        // ============ 工具函数 ============
         function escapeHtml(s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, function(m) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
             });
         }
 
-        // ============ 同步抽象层（云端优先，回退本地）============
         window.SyncStore = (function() {
             var sync = window.__SYNC__ || { mode: 'local', ready: Promise.resolve(false) };
             var mode = sync.mode;
@@ -1073,7 +1062,6 @@
             }
         })();
 
-        // ============ 每日行程折叠 ============
         window.toggleDayCard = function(headerEl) {
             var card = headerEl.closest('.day-card');
             if (!card) return;
@@ -1101,7 +1089,6 @@
             });
         })();
 
-        // ============ 交通卡片折叠 ============
         window.toggleTransportCard = function(headerEl) {
             var card = headerEl.closest('.transport-card');
             if (!card) return;
@@ -1117,7 +1104,6 @@
             });
         })();
 
-        // ============ 酒店卡片折叠 ============
         window.toggleHotelCard = function(headerEl) {
             var card = headerEl.closest('.hotel-card');
             if (!card) return;
@@ -1133,7 +1119,6 @@
             });
         })();
 
-        // ============ 交通卡片倒计时 ============
         (function() {
             function updateTransportCountdowns() {
                 var now = new Date();
@@ -1166,7 +1151,6 @@
             setInterval(updateTransportCountdowns, 60000);
         })();
 
-        // ============ 密码验证 ============
         (function() {
             var PASSWORD = '202610';
             var STORAGE_KEY = 'russia_trip_auth';
@@ -1202,7 +1186,6 @@
             setTimeout(function() { input.focus(); }, 300);
         })();
 
-        // ============ 通用确认弹窗 ============
         (function() {
             var confirmCallback = null;
             window.showConfirm = function(message, onOk, okText) {
@@ -1226,7 +1209,6 @@
             });
         })();
 
-        // ============ 双时钟 ============
         (function() {
             var beijingEl = document.getElementById('clockBeijing');
             var moscowEl = document.getElementById('clockMoscow');
@@ -1249,7 +1231,6 @@
             setInterval(updateClocks, 30000);
         })();
 
-        // ============ 航班滑动交互 ============
         (function() {
             var slider = document.getElementById('flightSlider');
             var tabs = document.querySelectorAll('.flight-tab');
@@ -1277,7 +1258,6 @@
             });
         })();
 
-        // ============ 底部 Tab 切换 ============
         (function() {
             var navBtns = document.querySelectorAll('.nav-btn');
             var tabs = {
@@ -1301,7 +1281,6 @@
             });
         })();
 
-        // ============ 折叠面板 ============
         (function() {
             document.querySelectorAll('.accordion-header').forEach(function(header) {
                 header.addEventListener('click', function() {
@@ -1312,7 +1291,6 @@
             if (pack) pack.classList.add('open');
         })();
 
-        // ============ 清单持久化（云端同步 / 本地回退）============
         (function() {
             var checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
             var currentState = {};
@@ -1335,7 +1313,6 @@
             });
         })();
 
-        // ============ 天气预测 ============
         (function() {
             var CITIES = {
                 moscow: { lat: 55.7558, lng: 37.6173 },
@@ -1394,7 +1371,6 @@
             }).catch(showWeatherError);
         })();
 
-        // ============ 高德地图：城市总览 ============
         function initAMap() {
             var cityEl = document.getElementById('city-map');
             if (!cityEl) return;
@@ -1427,7 +1403,7 @@
                     style: { 'background-color': '#ffffff', 'border': '1.5px solid ' + (borderColor || '#bfdbfe'), 'border-radius': '8px', 'padding': '3px 8px', 'color': textColor || '#1e40af', 'font-size': '10px', 'font-weight': '600', 'white-space': 'nowrap', 'box-shadow': '0 2px 6px rgba(0,0,0,0.1)', 'line-height': '1.4', 'font-family': 'inherit' } });
             }
             addRouteLabel([75.44, 43.5], '10/1 ✈️ CZ8027 广州→莫斯科', '#3b82f6', '#1e40af');
-            addRouteLabel([75.44, 35.5], '10/7 ✈️ CZ6565 莫斯科→广州', '#8b5cf6', '#6d28d9');
+            addRouteLabel([75.44, 35.5], '10/7 ✈️ CZ656 莫斯科→广州', '#8b5cf6', '#6d28d9');
             addRouteLabel([33.5, 58.0], '10/4 🚄 高铁 莫斯科→圣彼得堡', '#f59e0b', '#92400e');
             addRouteLabel([33.5, 57.0], '10/6 🚄 高铁 圣彼得堡→莫斯科', '#f59e0b', '#92400e');
 
@@ -1435,7 +1411,6 @@
             map.setBounds(bounds);
         }
 
-        // ============ 每日地图（Leaflet） ============
         function initDayMaps() {
             if (typeof L === 'undefined') return;
             function initDayMap(containerId, points, zoom, center) {
@@ -1480,58 +1455,47 @@
                 setTimeout(function() { if (el.offsetWidth > 0) map.invalidateSize(); }, 100);
             }
 
-            // Day 1: SVO → 酒店 → 红场 → 圣瓦西里 → 古姆
             initDayMap('map-day1', [
                 { pos: [37.4146, 55.9726], name: 'SVO机场' },
-                { pos: [37.6300, 55.7400], name: '宜必思酒店' },
+                { pos: [37.5876, 55.7522], name: '阿尔巴特蓬塔酒店' },
                 { pos: [37.6208, 55.7539], name: '红场' },
                 { pos: [37.6231, 55.7525], name: '圣瓦西里大教堂' },
                 { pos: [37.6215, 55.7558], name: '古姆百货' }
             ]);
-
-            // Day 2: 克里姆林宫军械库 → 亚历山大花园 → 红场 → 麻雀山 → 莫大 → 地铁 → 老阿尔巴特
             initDayMap('map-day2', [
-                { pos: [37.6175, 55.7520], name: '克里姆林宫军械库' },
-                { pos: [37.6124, 55.7558], name: '亚历山大花园' },
-                { pos: [37.6208, 55.7539], name: '红场' },
-                { pos: [37.5425, 55.7103], name: '麻雀山观景台' },
-                { pos: [37.5305, 55.7034], name: '莫斯科大学' },
+                { pos: [37.6055, 55.7447], name: '基督救世主大教堂' },
+                { pos: [36.8100, 55.5790], name: '武装力量大教堂' },
+                { pos: [37.5876, 55.7522], name: '阿尔巴特蓬塔酒店' },
                 { pos: [37.5900, 55.7520], name: '老阿尔巴特街' }
             ]);
-
-            // Day 3: 克里姆林宫教堂广场全天
             initDayMap('map-day3', [
-                { pos: [37.6175, 55.7520], name: '克里姆林宫入口' },
+                { pos: [37.6124, 55.7558], name: '亚历山大花园' },
                 { pos: [37.6198, 55.7515], name: '列宁墓' },
+                { pos: [37.6175, 55.7520], name: '克里姆林宫入口' },
                 { pos: [37.6185, 55.7518], name: '教堂广场' },
-                { pos: [37.6215, 55.7558], name: '古姆百货' }
+                { pos: [37.6178, 55.7522], name: '军械库' },
+                { pos: [37.6172, 55.7525], name: '钻石库' }
             ]);
-
-            // Day 4: 基督救世主大教堂 → 列宁格勒站
             initDayMap('map-day4', [
-                { pos: [37.6055, 55.7447], name: '基督救世主大教堂' },
-                { pos: [37.6300, 55.7400], name: '宜必思酒店' },
-                { pos: [37.6555, 55.7758], name: '列宁格勒站' }
+                { pos: [37.5876, 55.7522], name: '阿尔巴特蓬塔酒店' },
+                { pos: [37.6555, 55.7758], name: '列宁格勒站' },
+                { pos: [30.3560, 59.9310], name: 'Hotel Indigo 圣彼得堡' }
             ]);
-
-            // Day 5: 夏宫 → 喀山 → 滴血 → 涅瓦大街
             initDayMap('map-day5', [
+                { pos: [30.3560, 59.9310], name: 'Hotel Indigo 圣彼得堡' },
                 { pos: [29.9080, 59.8845], name: '夏宫（彼得霍夫）' },
-                { pos: [30.3240, 59.9340], name: '喀山大教堂' },
-                { pos: [30.3290, 59.9400], name: '滴血救世主教堂' },
                 { pos: [30.3350, 59.9330], name: '涅瓦大街' }
             ]);
-
-            // Day 6: 冬宫 → 圣彼得堡莫斯科站
             initDayMap('map-day6', [
                 { pos: [30.3140, 59.9410], name: '冬宫' },
-                { pos: [30.3600, 59.9290], name: '圣彼得堡莫斯科站' }
+                { pos: [30.3290, 59.9400], name: '滴血救世主教堂' },
+                { pos: [30.3240, 59.9340], name: '喀山大教堂' },
+                { pos: [30.3560, 59.9310], name: 'Hotel Indigo 圣彼得堡' },
+                { pos: [37.6800, 55.8000], name: '索科尔尼基智选假日酒店' }
             ]);
-
-            // Day 7: 特列季亚科夫画廊 → SVO
             initDayMap('map-day7', [
+                { pos: [37.6800, 55.8000], name: '索科尔尼基智选假日酒店' },
                 { pos: [37.6208, 55.7415], name: '特列季亚科夫画廊' },
-                { pos: [37.6300, 55.7400], name: '宜必思酒店' },
                 { pos: [37.4146, 55.9726], name: 'SVO机场' }
             ]);
         }
